@@ -775,26 +775,6 @@ La suite viendra à ceux qui comprennent.<br>
         setInterval(draw, 35);
         
         // Terminal input functionality
-        const commandInput = document.querySelector('.command-input');
-        commandInput.addEventListener('keypress', function(e) {
-            if(e.key === 'Enter') {
-                const command = this.value.toLowerCase();
-                
-                if(command === 'help') {
-                    alert('COMMANDS:\n\nhelp - Show this message\nmanifest - Read our story\nprotocols - View operational protocols\noperations - Current ops status\nrecruit - Join us\nclear - Clear terminal\nsierra - [CLASSIFIED]');
-                } else if(command === 'sierra') {
-                    alert('[CLASSIFIED]\n\nAccess Denied.\nSierra threat level: MAXIMUM\nOmega 2.0 status: ACTIVE DEVELOPMENT\n\nIf you have information about Sierra, contact us immediately.');
-                } else if(command === 'clear') {
-                    location.reload();
-                } else if(command) {
-                    alert('Command not found. Type "help" for available commands.');
-                }
-                
-                this.value = '';
-            }
-        });
-
-        // Terminal input functionality
 const commandInput = document.querySelector('.command-input');
 commandInput.addEventListener('keypress', function(e) {
     if(e.key === 'Enter') {
@@ -841,6 +821,7 @@ commandInput.addEventListener('keypress', function(e) {
         this.value = '';
     }
 });
+        
         
         // Glitch effect on scroll
         window.addEventListener('scroll', function() {
