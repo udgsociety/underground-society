@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULL_SECTOR - Access Granted</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: #000;
+            color: #00ff00;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+        
+        /* Terminal effect */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            border-bottom: 1px solid #00ff00;
+            padding: 20px;
+        }
+        
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo {
+            font-size: 24px;
+            color: #00ff00;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo::before {
+            content: "▓";
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: #00ff00;
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: #fff;
+            text-shadow: 0 0 10px #00ff00;
+        }
+        
+        .nav-links a::after {
+            content: "_";
+            position: absolute;
+            right: -10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .nav-links a:hover::after {
+            opacity: 1;
+            animation: blink 0.5s infinite;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(circle at center, rgba(0, 255, 0, 0.1) 0%, transparent 50%);
+        }
+        
+        .terminal-window {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.5);
+        }
+        
+        .terminal-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #00ff00;
+        }
+        
+        .terminal-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+        }
+        
+        .terminal-title {
+            flex: 1;
+            text-align: center;
+            font-size: 14px;
+            color: #00ff00;
+        }
+        
+        .terminal-content {
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .typing-effect {
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(40, end);
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        .command-line {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .prompt {
+            color: #00ff00;
+        }
+        
+        .command-input {
+            background: none;
+            border: none;
+            color: #00ff00;
+            font-family: inherit;
+            font-size: 16px;
+            outline: none;
+            flex: 1;
+        }
+        
+        /* Sections */
+        .section {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-top: 1px solid #00ff00;
+        }
+        
+        .section-title {
+            font-size: 32px;
+            margin-bottom: 40px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .section-title::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            animation: blink 1s infinite;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .card {
+            background: rgba(0, 255, 0, 0.05);
+            border: 1px solid #00ff00;
+            padding: 30px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card:hover {
+            background: rgba(0, 255, 0, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+            transform: translateY(-5px);
+        }
+        
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent, rgba(0, 255, 0, 0.2), transparent);
+            transition: top 0.5s;
+        }
+        
+        .card:hover::before {
+            top: 100%;
+        }
+        
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .card p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #00ff00;
+        }
+        
+        /* Code blocks */
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff00;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Share Tech Mono', monospace;
+            overflow-x: auto;
+        }
+        
+        .code-block code {
+            color: #00ff00;
+            font-size: 14px;
+        }
+        
+        /* Glitch effect */
+        .glitch {
+            position: relative;
+            color: #00ff00;
+            font-size: 48px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                        -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                        0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            animation: glitch 500ms infinite;
+        }
+        
+        @keyframes glitch {
+            0% {
+                text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                            -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                            0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+            15% {
+                text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
+                            -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
+                            0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+            16% {
+                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                            0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                            -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+            49% {
+                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
+                            0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
+                            -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+            50% {
+                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                            0.05em 0 0 rgba(0, 255, 0, 0.75),
+                            0 -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+            99% {
+                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
+                            0.05em 0 0 rgba(0, 255, 0, 0.75),
+                            0 -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+            100% {
+                text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
+                            -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
+                            -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
+            }
+        }
+        
+        /* Matrix rain background */
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #00ff00;
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .footer p {
+            font-size: 14px;
+            color: #00ff00;
+            margin-bottom: 10px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .glitch {
+                font-size: 32px;
+            }
+            
+            .section-title {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <a href="#" class="logo">UNDERGROUND SOCIETY</a>
+            <ul class="nav-links">
+                <li><a href="#manifest">./manifeste</a></li>
+                <li><a href="#protocols">./objectifs</a></li>
+                <li><a href="#operations">./membres</a></li>
+                <li><a href="#recruit">./recrutement</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-button"></div>
+                <div class="terminal-button" style="background: #ffff00;"></div>
+                <div class="terminal-button" style="background: #ff0000;"></div>
+                <div class="terminal-title">root@null_sector:~</div>
+            </div>
+            <div class="terminal-content">
+                <p class="typing-effect">Establishing secure connection...</p>
+                <p style="margin-top: 10px;">Connection established.</p>
+                <p style="margin-top: 10px;">Running on TOR exit node: LS-UNDERGROUND-437</p>
+                <p>Encryption: AES-256-GCM</p>
+                <p>Status: <span style="color: #fff;">UNDETECTED</span></p>
+                <br>
+                <p class="glitch">UNDERGROUND SOCIETY</p>
+                <p style="margin-top: 20px;">Los Santos. Ville corrompue jusqu'à la moelle.</p>
+                <p>Nous avons observé. Nous avons patienté. Nous avons infiltré.</p>
+                <p>Le moment est venu de révéler la vérité.</p>
+                <br>
+                <p style="color: #fff;">"La justice n'existe pas. Nous sommes la conséquence."</p>
+                
+                <div class="command-line">
+                    <span class="prompt">root@null_sector:~$</span>
+                    <input type="text" class="command-input" placeholder="type 'help' for commands..." autofocus>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Manifest Section -->
+    <section class="section" id="manifest">
+        <h2 class="section-title">cat /manifest.txt</h2>
+        
+        <div class="code-block">
+            <code>
+[2014-2019] L'OBSERVATION<br>
+Pendant 5 ans, nous avons étudié Los Santos. Infiltré ses institutions.<br>
+Compris ses failles. Cartographié sa corruption.<br>
+<br>
+Nous avons vu:<br>
+• Les flics du LSPD vendre des armes aux criminels<br>
+• Le FBR fabriquer des preuves pour des condamnations arbitraires<br>
+• Le procureur manipuler la justice selon ses intérêts personnels<br>
+• Les médecins de l'EMS trafiquer des substances illégales<br>
+• Les gérants d'armureries alimenter les guerres de gangs pour le profit<br>
+• Les racistes du nord terroriser des innocents en toute impunité<br>
+<br>
+[2019-2024] LA DISPERSION<br>
+Un de nos membres a voulu aller trop vite. Trop loin.<br>
+L'opération a mal tourné. Le groupe s'est dispersé.<br>
+Nous nous sommes fondus dans l'ombre. Infiltrés dans le crime organisé.<br>
+Italiens. Creeps. D'autres. Collecte de fonds. Préparation.<br>
+<br>
+[2025] LA RENAISSANCE<br>
+7 membres. 7 fantômes revenus pour finir ce qu'on a commencé.<br>
+Nouveaux outils. Nouvelle approche. Patience et précision.<br>
+<br>
+Cette fois, nous ne nous précipiterons pas.<br>
+Chaque corruption sera exposée. Chaque secret révélé.<br>
+Un hack à la fois. Une vérité à la fois.<br>
+<br>
+STATUT: PHASE 1 - RECONSTRUCTION<br>
+MEMBRES ACTIFS: 7<br>
+NIVEAU DE PRÉPARATION: ████░░░░░░ 40%<br>
+            </code>
+        </div>
+    </section>
+    
+    <!-- Protocols Section -->
+    <section class="section" id="protocols">
+        <h2 class="section-title">ls /objectifs/</h2>
+        
+        <h3 style="color: #fff; margin-bottom: 30px;">OBJECTIFS COURT TERME (0-3 MOIS)</h3>
+        <div class="grid">
+            <div class="card">
+                <h3>Reconstruction Infrastructure</h3>
+                <p>• Acquisition de serveurs sécurisés</p>
+                <p>• Mise en place d'un réseau crypté</p>
+                <p>• Installation de backdoors dans les systèmes publics</p>
+                <p>• Création d'identités numériques de couverture</p>
+                <p>• Sécurisation de 3 nouveaux entrepôts</p>
+            </div>
+            
+            <div class="card">
+                <h3>Collecte de Renseignements</h3>
+                <p>• Infiltration des communications LSPD</p>
+                <p>• Surveillance des transactions du procureur</p>
+                <p>• Cartographie des réseaux corrompus</p>
+                <p>• Identification des cibles prioritaires</p>
+                <p>• Constitution de dossiers compromettants</p>
+            </div>
+            
+            <div class="card">
+                <h3>Recrutement & Formation</h3>
+                <p>• Identification de 5 nouveaux talents</p>
+                <p>• Formation aux protocoles de sécurité</p>
+                <p>• Tests d'infiltration supervisés</p>
+                <p>• Établissement de cellules autonomes</p>
+                <p>• Mise en place de la hiérarchie</p>
+            </div>
+        </div>
+        
+        <h3 style="color: #fff; margin: 40px 0 30px 0;">OBJECTIFS LONG TERME (6-12 MOIS)</h3>
+        <div class="grid">
+            <div class="card">
+                <h3>Opération Transparence</h3>
+                <p>• Exposer la corruption du LSPD</p>
+                <p>• Révéler les malversations du procureur</p>
+                <p>• Publier les preuves du trafic EMS</p>
+                <p>• Dévoiler les liens criminalité/gouvernement</p>
+                <p>• Forcer des démissions et arrestations</p>
+            </div>
+            
+            <div class="card">
+                <h3>Redistribution Numérique</h3>
+                <p>• Transferts forcés depuis comptes corrompus</p>
+                <p>• Annulation de dettes citoyennes illégitimes</p>
+                <p>• Sabotage économique des profiteurs de guerre</p>
+                <p>• Création d'un fonds pour victimes du système</p>
+                <p>• Blackout financier des institutions corrompues</p>
+            </div>
+            
+            <div class="card">
+                <h3>Contrôle Infrastructure</h3>
+                <p>• Accès permanent aux caméras de la ville</p>
+                <p>• Manipulation du système de feux tricolores</p>
+                <p>• Contrôle des communications d'urgence</p>
+                <p>• Infiltration totale des bases de données</p>
+                <p>• Capacité de blackout à volonté</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Operations Section -->
+    <section class="section" id="operations">
+        <h2 class="section-title">grep -r "membres" /underground/</h2>
+        
+        <div class="code-block">
+            <code>
+MEMBRES ACTIFS: 7<br>
+<br>
+[MEMBRE-001] "FANTÔME"<br>
+Rôle: Fondateur / Architecte réseau<br>
+Cover: Mécanicien chez les Italiens<br>
+Spécialité: Infrastructure, serveurs, cryptographie<br>
+Statut: Actif - Coordonne la reconstruction<br>
+<br>
+[MEMBRE-002] "SILENCE"<br>
+Rôle: Infiltration sociale<br>
+Cover: Coursier indépendant<br>
+Spécialité: Ingénierie sociale, manipulation<br>
+Statut: Actif - Embedded au LSPD<br>
+<br>
+[MEMBRE-003] "GLITCH"<br>
+Rôle: Développeur outils<br>
+Cover: Vendeur chez les Creeps<br>
+Spécialité: Création de malware, exploits<br>
+Statut: Actif - Reconstruction des outils perdus<br>
+<br>
+[MEMBRE-004] "ÉCHO"<br>
+Rôle: Surveillance & Renseignement<br>
+Cover: Employé de parking<br>
+Spécialité: OSINT, analyse de données<br>
+Statut: Actif - Cartographie des réseaux corrompus<br>
+<br>
+[MEMBRE-005] "PIXEL"<br>
+Rôle: Opérations terrain<br>
+Cover: Livreur de pizzas<br>
+Spécialité: Installation hardware, infiltration physique<br>
+Statut: Actif - Sécurisation des planques<br>
+<br>
+[MEMBRE-006] "STATIC"<br>
+Rôle: Communications<br>
+Cover: Technicien télécom<br>
+Spécialité: Interception, brouillage radio<br>
+Statut: Actif - Écoute des fréquences gouvernementales<br>
+<br>
+[MEMBRE-007] "VOID"<br>
+Rôle: Finances & Logistique<br>
+Cover: Comptable freelance<br>
+Spécialité: Blanchiment crypto, transferts<br>
+Statut: Actif - Gestion des ressources<br>
+<br>
+Note: Tous les membres maintiennent leurs couvertures.<br>
+Aucune activité suspecte jusqu'à la Phase 2.<br>
+            </code>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h3 style="color: #fff; margin-bottom: 20px;">RESSOURCES ACTUELLES:</h3>
+            <div class="grid">
+                <div class="card">
+                    <h3>Infrastructure</h3>
+                    <p>• Entrepôts sécurisés: 3</p>
+                    <p>• Véhicules modifiés: 4</p>
+                    <p>• Armes à feu: 6 (défense uniquement)</p>
+                    <p>• Serveurs: 0 (en cours d'acquisition)</p>
+                    <p>• Safe houses: 2 (temporaires)</p>
+                </div>
+                
+                <div class="card">
+                    <h3>Capacités Techniques</h3>
+                    <p>• Outils de hack: En reconstruction (30%)</p>
+                    <p>• Backdoors actives: 0 (phase reconnaissance)</p>
+                    <p>• Réseau crypté: Installation en cours</p>
+                    <p>• Capacité d'interception: Limitée</p>
+                    <p>• Brouillage: Prototype fonctionnel</p>
+                </div>
+                
+                <div class="card">
+                    <h3>Finances</h3>
+                    <p>• Budget opérationnel: $127,000</p>
+                    <p>• Revenus mensuels: Via couvertures</p>
+                    <p>• Crypto-réserve: En constitution</p>
+                    <p>• Fonds d'urgence: $45,000</p>
+                    <p>• Objectif Phase 2: $500,000</p>
+                </div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <h3 style="color: #fff; margin-bottom: 20px;">OPÉRATIONS PLANIFIÉES:</h3>
+            <div class="code-block">
+                <code>
+[OP-001] "PREMIER SIGNAL"<br>
+Cible: Réseau de caméras du quartier sud<br>
+Objectif: Test d'intrusion, mapping du système<br>
+Risque: Minimal<br>
+Statut: Planification<br>
+<br>
+[OP-002] "ÉCOUTE PASSIVE"<br>
+Cible: Communications radio LSPD<br>
+Objectif: Collecte de preuves de corruption<br>
+Risque: Faible<br>
+Statut: En cours (17% de couverture)<br>
+<br>
+[OP-003] "TEST DE CHARGE"<br>
+Cible: Feux tricolores - Secteur industriel<br>
+Objectif: Vérifier nos capacités de disruption<br>
+Risque: Modéré<br>
+Statut: Attente acquisition serveurs<br>
+<br>
+[OP-004] "DOSSIER NOIR"<br>
+Cible: Base de données des contraventions<br>
+Objectif: Identifier les abus de pouvoir<br>
+Risque: Modéré<br>
+Statut: Reconnaissance<br>
+                </code>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Recruitment Section -->
+    <section class="section" id="recruit">
+        <h2 class="section-title">./recruit.sh --init</h2>
+        
+        <div class="terminal-window" style="margin-bottom: 40px;">
+            <div class="terminal-content">
+                <p>Initializing recruitment protocol...</p>
+                <p>Scanning for potential assets...</p>
+                <br>
+                <p style="color: #fff;">NOUS RECHERCHONS:</p>
+                <p>• Hackers (pentest, reverse engineering, cryptographie)</p>
+                <p>• Ingénieurs sociaux (infiltration, manipulation)</p>
+                <p>• Techniciens (hardware, réseaux, drones)</p>
+                <p>• Analystes (OSINT, pattern recognition)</p>
+                <p>• Opérateurs (terrain, exfiltration, logistics)</p>
+                <br>
+                <p style="color: #ff0000;">AVERTISSEMENT:</p>
+                <p>Rejoindre NULL_SECTOR est un engagement à vie.</p>
+                <p>Trahison = Disparition. Aucune exception.</p>
+            </div>
+        </div>
+        
+        <div class="code-block">
+            <code>
+PROCESSUS DE RECRUTEMENT:<br>
+<br>
+PHASE 1: DÉCOUVERTE<br>
+Des indices sont disséminés dans Los Santos.<br>
+Graffitis. QR codes. Transmissions radio.<br>
+Seuls les plus observateurs les trouveront.<br>
+<br>
+PHASE 2: PREMIER CONTACT<br>
+Puzzle cryptographique à résoudre.<br>
+Temps limite: 48h. Pas de seconde chance.<br>
+<br>
+PHASE 3: ÉVALUATION<br>
+Test pratique supervisé à distance.<br>
+Hack mineur. Cible fournie. Méthode libre.<br>
+<br>
+PHASE 4: RENCONTRE<br>
+Lieu public. Heure tardive. Venez seul.<br>
+Nous vous observons depuis 72h minimum.<br>
+<br>
+PHASE 5: INITIATION<br>
+Première mission réelle. Baptême du feu.<br>
+Réussite = Membre. Échec = Oubli.<br>
+<br>
+POUR COMMENCER:<br>
+Cherchez le symbole NULL dans Little Seoul.<br>
+La suite viendra à ceux qui comprennent.<br>
+<br>
+"La curiosité est la première qualité d'un hacker."<br>
+            </code>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="footer">
+        <p>UNDERGROUND SOCIETY © 2025 | Réseau Sécurisé | Contact: [CRYPTÉ]</p>
+        <p>Nous sommes partout. Nous sommes nulle part. Nous sommes la conséquence.</p>
+        <p style="margin-top: 20px; font-size: 12px; opacity: 0.5;">
+            4C 61 20 6A 75 73 74 69 63 65 20 6E 27 65 78 69 73 74 65 20 70 61 73 2E 20 4E 6F 75 73 20 73 6F 6D 6D 65 73 20 6C 61 20 63 6F 6E 73 C3 A9 71 75 65 6E 63 65 2E
+        </p>
+    </footer>
+    
+    <script>
+        // Matrix rain effect
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+        const matrixArray = matrix.split("");
+        
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+        
+        const drops = [];
+        for(let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+        
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.fillStyle = '#00ff00';
+            ctx.font = fontSize + 'px monospace';
+            
+            for(let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        
+        setInterval(draw, 35);
+        
+        // Terminal input functionality
+        const commandInput = document.querySelector('.command-input');
+        commandInput.addEventListener('keypress', function(e) {
+            if(e.key === 'Enter') {
+                const command = this.value.toLowerCase();
+                
+                if(command === 'help') {
+                    alert('COMMANDS:\n\nhelp - Show this message\nmanifest - Read our story\nprotocols - View operational protocols\noperations - Current ops status\nrecruit - Join us\nclear - Clear terminal\nsierra - [CLASSIFIED]');
+                } else if(command === 'sierra') {
+                    alert('[CLASSIFIED]\n\nAccess Denied.\nSierra threat level: MAXIMUM\nOmega 2.0 status: ACTIVE DEVELOPMENT\n\nIf you have information about Sierra, contact us immediately.');
+                } else if(command === 'clear') {
+                    location.reload();
+                } else if(command) {
+                    alert('Command not found. Type "help" for available commands.');
+                }
+                
+                this.value = '';
+            }
+        });
+        
+        // Glitch effect on scroll
+        window.addEventListener('scroll', function() {
+            const glitchElements = document.querySelectorAll('.section-title');
+            glitchElements.forEach(el => {
+                if(Math.random() > 0.95) {
+                    el.style.textShadow = `${Math.random() * 10}px ${Math.random() * 10}px rgba(0, 255, 0, 0.5)`;
+                    setTimeout(() => {
+                        el.style.textShadow = '';
+                    }, 100);
+                }
+            });
+        });
+        
+        // Easter egg
+        let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+        let konamiIndex = 0;
+        
+        document.addEventListener('keydown', function(e) {
+            if(e.key === konamiCode[konamiIndex]) {
+                konamiIndex++;
+                if(konamiIndex === konamiCode.length) {
+                    document.body.style.transform = 'rotate(180deg)';
+                    setTimeout(() => {
+                        alert('EASTER EGG FOUND!\n\nYou have the curiosity we seek.\nFind the NULL symbol in Little Seoul.\n\nCoordinates: [ENCRYPTED]');
+                        document.body.style.transform = '';
+                    }, 1000);
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
+    </script>
+</body>
+</html>
