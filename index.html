@@ -20,6 +20,84 @@
             overflow-x: hidden;
             cursor: crosshair;
         }
+        /* Easter eggs styles */
+.matrix-red {
+    color: #ff0000 !important;
+}
+
+.terminal-3d {
+    transform: perspective(1000px) rotateY(20deg);
+    transition: transform 0.5s;
+}
+
+.secret-message {
+    position: fixed;
+    bottom: -100px;
+    right: 20px;
+    background: #00ff00;
+    color: #000;
+    padding: 20px;
+    border: 2px solid #fff;
+    font-family: monospace;
+    transition: bottom 0.5s;
+    z-index: 9999;
+}
+
+.secret-message.show {
+    bottom: 20px;
+}
+
+.hack-mode {
+    animation: hack-pulse 0.5s infinite;
+}
+
+@keyframes hack-pulse {
+    0% { filter: brightness(1); }
+    50% { filter: brightness(1.5) hue-rotate(180deg); }
+    100% { filter: brightness(1); }
+}
+
+.ascii-art {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: monospace;
+    font-size: 14px;
+    color: #00ff00;
+    white-space: pre;
+    line-height: 1;
+    z-index: 9999;
+    display: none;
+}
+
+.glitch-window {
+    position: fixed;
+    width: 400px;
+    height: 300px;
+    background: #000;
+    border: 1px solid #00ff00;
+    z-index: 9999;
+    display: none;
+}
+
+.glitch-window-header {
+    background: #00ff00;
+    color: #000;
+    padding: 5px;
+    cursor: move;
+}
+
+.binary-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9998;
+    display: none;
+}
 
         /* Virus decomposition effect */
 .virus-active {
@@ -408,6 +486,25 @@
 </head>
 <body>
     <canvas class="matrix-bg" id="matrix"></canvas>
+
+    <!-- Audio elements -->
+<audio id="keySound" preload="auto">
+    <source src="https://www.soundjay.com/misc/sounds/keyboard-typing-1.wav" type="audio/wav">
+</audio>
+<audio id="hackSound" preload="auto">
+    <source src="https://www.soundjay.com/misc/sounds/computer-beep-1.wav" type="audio/wav">
+</audio>
+<audio id="errorSound" preload="auto">
+    <source src="https://www.soundjay.com/misc/sounds/fail-buzzer-1.wav" type="audio/wav">
+</audio>
+<audio id="successSound" preload="auto">
+    <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
+</audio>
+
+<!-- Hidden elements for easter eggs -->
+<div class="secret-message" id="secretMessage"></div>
+<div class="ascii-art" id="asciiArt"></div>
+<canvas class="binary-rain" id="binaryRain"></canvas>
     
     <!-- Header -->
     <header class="header">
