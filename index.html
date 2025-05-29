@@ -833,125 +833,984 @@ La suite viendra à ceux qui comprennent.<br>
     </footer>
     
     <script>
-        // Matrix rain effect
-        const canvas = document.getElementById('matrix');
-        const ctx = canvas.getContext('2d');
+       // Matrix rain effect
+const canvas = document.getElementById('matrix');
+const ctx = canvas.getContext('2d');
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
+const matrixArray = matrix.split("");
+
+const fontSize = 10;
+const columns = canvas.width / fontSize;
+
+const drops = [];
+for(let x = 0; x < columns; x++) {
+    drops[x] = 1;
+}
+
+function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#00ff00';
+    ctx.font = fontSize + 'px monospace';
+    
+    for(let i = 0; i < drops.length; i++) {
+        const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
         
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
-        const matrixArray = matrix.split("");
-        
-        const fontSize = 10;
-        const columns = canvas.width / fontSize;
-        
-        const drops = [];
-        for(let x = 0; x < columns; x++) {
-            drops[x] = 1;
+        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            drops[i] = 0;
         }
-        
-        function draw() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#00ff00';
-            ctx.font = fontSize + 'px monospace';
-            
-            for(let i = 0; i < drops.length; i++) {
-                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
-        
-        setInterval(draw, 35);
-        
-        // Terminal input functionality
+        drops[i]++;
+    }
+}
+
+setInterval(draw, 35);
+
+// Sound system
+const sounds = {
+    key: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiDYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizEIHWq+8+OWT' +
+              'AkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RjFAU4jdDsvHYnBCh+zPLchjMJFmO78OaeTQ0NU6jj7b1kGAU9' +
+              'lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzl67VfGAU/ldr3u3AkBjJ+zPDXfS0IG2m98OaXTwwNVazn7bNeFwU3jdLqu34uBS+A0fXffSsHG2m58OKZTwwLUqfk7bllFgU3jdLqu34uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTw=='),
+    hack: new Audio('data:audio/wav;base64,UklGRoYEAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YWIEAAD/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////'),
+    error: new Audio('data:audio/wav;base64,UklGRvQCAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YdACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='),
+    success: new Audio('data:audio/wav;base64,UklGRl4FAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=')
+};
+
+// Mute sounds by default (add volume control)
+Object.values(sounds).forEach(sound => sound.volume = 0.3);
+
+// Terminal state
+let terminalHistory = [];
+let historyIndex = -1;
+let currentDirectory = '/home/underground';
+let hackerLevel = 0;
+let secretsFound = [];
+
+// Enhanced terminal with easter eggs
 const commandInput = document.querySelector('.command-input');
+const terminalContent = document.querySelector('.terminal-content');
+
+// Key sound on typing
+commandInput.addEventListener('keydown', function(e) {
+    if(e.key !== 'Enter') {
+        sounds.key.currentTime = 0;
+        sounds.key.play().catch(() => {});
+    }
+});
+
+// Command processing
 commandInput.addEventListener('keypress', function(e) {
     if(e.key === 'Enter') {
-        const command = this.value.toLowerCase();
+        const command = this.value.toLowerCase().trim();
+        terminalHistory.push(command);
+        historyIndex = terminalHistory.length;
         
-        if(command === 'help') {
-            alert('COMMANDS:\n\nhelp - Show this message\nmanifeste - Read our story\nobjectifs - View operational objectives\nmembres - Current members status\nrecrutement - Join us\nclear - Clear terminal\nhurricane - [UNKNOWN COMMAND]');
-        } else if(command === 'hurricane') {
-            // Virus activation
-            document.body.innerHTML += '<div class="virus-text">SYSTÈME COMPROMIS</div>';
-            document.querySelector('.virus-text').style.display = 'block';
-            
-            setTimeout(() => {
-                document.querySelectorAll('*').forEach(el => {
-                    el.classList.add('virus-active');
-                });
-                
-                setTimeout(() => {
-                    document.body.classList.add('corrupted');
-                    document.body.innerHTML = `
-                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
-                            <h1 style="color: #ff0000; font-size: 48px; text-shadow: 0 0 20px #ff0000;">HURRICANE DETECTED</h1>
-                            <p style="color: #ff0000; font-size: 24px; margin-top: 20px;">SYSTÈME DÉTRUIT</p>
-                            <p style="color: #00ff00; font-size: 16px; margin-top: 40px;">root@underground:~$ rm -rf / --no-preserve-root</p>
-                            <p style="color: #00ff00; font-size: 16px; margin-top: 10px;">Suppression en cours...</p>
-                        </div>
-                    `;
-                    
-                    // Matrix effect becomes red
-                    const canvas = document.getElementById('matrix');
-                    if(canvas) {
-                        const ctx = canvas.getContext('2d');
-                        ctx.fillStyle = '#ff0000';
-                    }
-                }, 2000);
-            }, 1000);
-            
-        } else if(command === 'clear') {
-            location.reload();
-        } else if(command) {
-            alert('Command not found. Type "help" for available commands.');
-        }
-        
+        processCommand(command);
         this.value = '';
     }
 });
-        
-        
-        // Glitch effect on scroll
-        window.addEventListener('scroll', function() {
-            const glitchElements = document.querySelectorAll('.section-title');
-            glitchElements.forEach(el => {
-                if(Math.random() > 0.95) {
-                    el.style.textShadow = `${Math.random() * 10}px ${Math.random() * 10}px rgba(0, 255, 0, 0.5)`;
-                    setTimeout(() => {
-                        el.style.textShadow = '';
-                    }, 100);
-                }
-            });
-        });
-        
-        // Easter egg
-        let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-        let konamiIndex = 0;
-        
-        document.addEventListener('keydown', function(e) {
-            if(e.key === konamiCode[konamiIndex]) {
-                konamiIndex++;
-                if(konamiIndex === konamiCode.length) {
-                    document.body.style.transform = 'rotate(180deg)';
-                    setTimeout(() => {
-                        alert('EASTER EGG FOUND!\n\nYou have the curiosity we seek.\nFind the NULL symbol in Little Seoul.\n\nCoordinates: [ENCRYPTED]');
-                        document.body.style.transform = '';
-                    }, 1000);
-                    konamiIndex = 0;
-                }
+
+// History navigation
+commandInput.addEventListener('keydown', function(e) {
+    if(e.key === 'ArrowUp' && historyIndex > 0) {
+        historyIndex--;
+        this.value = terminalHistory[historyIndex];
+    } else if(e.key === 'ArrowDown' && historyIndex < terminalHistory.length - 1) {
+        historyIndex++;
+        this.value = terminalHistory[historyIndex];
+    }
+});
+
+function processCommand(command) {
+    const args = command.split(' ');
+    const cmd = args[0];
+    
+    switch(cmd) {
+        case 'help':
+            showHelp();
+            break;
+            
+        case 'ls':
+            listDirectory();
+            break;
+            
+        case 'cd':
+            changeDirectory(args[1]);
+            break;
+            
+        case 'cat':
+            readFile(args[1]);
+            break;
+            
+        case 'hack':
+            initHackMode();
+            break;
+            
+        case 'matrix':
+            matrixMode();
+            break;
+            
+        case 'whoami':
+            showIdentity();
+            break;
+            
+        case 'ping':
+            pingServer(args[1]);
+            break;
+            
+        case 'ssh':
+            sshConnect(args[1]);
+            break;
+            
+        case 'decrypt':
+            decrypt(args[1]);
+            break;
+            
+        case 'hurricane':
+            hurricaneVirus();
+            break;
+            
+        case 'clear':
+            location.reload();
+            break;
+            
+        case '42':
+            theAnswer();
+            break;
+            
+        case 'sudo':
+            sudoCommand(args.slice(1).join(' '));
+            break;
+            
+        case 'nmap':
+            networkScan();
+            break;
+            
+        case 'follow':
+            if(args[1] === 'the' && args[2] === 'white' && args[3] === 'rabbit') {
+                whiteRabbit();
             } else {
-                konamiIndex = 0;
+                unknownCommand(command);
             }
+            break;
+            
+        default:
+            unknownCommand(command);
+    }
+}
+
+function showHelp() {
+    const helpText = `
+COMMANDES DISPONIBLES:
+  help              - Affiche cette aide
+  ls                - Liste les fichiers
+  cd [dir]          - Change de répertoire
+  cat [file]        - Lit un fichier
+  whoami            - Qui suis-je?
+  ping [host]       - Ping un serveur
+  ssh [host]        - Connection SSH
+  decrypt [code]    - Décrypte un message
+  hack              - Active le mode hack
+  matrix            - Change la matrice
+  clear             - Nettoie le terminal
+  nmap              - Scan du réseau
+  
+COMMANDES SECRÈTES:
+  ????              - À vous de découvrir...`;
+  
+    addToTerminal(helpText);
+    sounds.success.play();
+}
+
+function listDirectory() {
+    let files = '';
+    
+    switch(currentDirectory) {
+        case '/home/underground':
+            files = `
+drwxr-xr-x  2 root root  4096 Jan 15 03:14 .
+drwxr-xr-x  3 root root  4096 Jan 15 03:14 ..
+-rw-r--r--  1 root root   220 Jan 15 03:14 .bash_logout
+-rw-r--r--  1 root root  3526 Jan 15 03:14 .bashrc
+-rw-r--r--  1 root root   807 Jan 15 03:14 .profile
+drwx------  2 root root  4096 Jan 15 03:14 .ssh/
+-rw-------  1 root root  1337 Jan 15 03:14 secret.txt
+-rwx------  1 root root  2048 Jan 15 03:14 enigma.sh
+drwxr-xr-x  2 root root  4096 Jan 15 03:14 tools/`;
+            break;
+            
+        case '/home/underground/tools':
+            files = `
+-rwxr-xr-x  1 root root  4096 Jan 15 03:14 exploit.py
+-rwxr-xr-x  1 root root  2048 Jan 15 03:14 scanner.sh
+-rwxr-xr-x  1 root root  8192 Jan 15 03:14 cryptor.exe
+-rw-r--r--  1 root root   512 Jan 15 03:14 passwords.db`;
+            break;
+            
+        case '/home/underground/.ssh':
+            files = `
+-rw-------  1 root root  1679 Jan 15 03:14 id_rsa
+-rw-r--r--  1 root root   398 Jan 15 03:14 id_rsa.pub
+-rw-r--r--  1 root root   444 Jan 15 03:14 known_hosts`;
+            break;
+            
+        default:
+            files = 'Accès refusé.';
+    }
+    
+    addToTerminal(files);
+    sounds.key.play();
+}
+
+function changeDirectory(dir) {
+    if(!dir || dir === '~') {
+        currentDirectory = '/home/underground';
+        addToTerminal('Retour au répertoire home.');
+    } else if(dir === '..') {
+        if(currentDirectory !== '/home/underground') {
+            currentDirectory = '/home/underground';
+            addToTerminal('Répertoire parent.');
+        }
+    } else if(dir === 'tools' && currentDirectory === '/home/underground') {
+        currentDirectory = '/home/underground/tools';
+        addToTerminal('Entré dans tools/');
+        sounds.success.play();
+    } else if(dir === '.ssh' && currentDirectory === '/home/underground') {
+        currentDirectory = '/home/underground/.ssh';
+        addToTerminal('Entré dans .ssh/');
+        showSecretMessage('SSH keys trouvées... intéressant.');
+    } else {
+        addToTerminal(`bash: cd: ${dir}: Aucun fichier ou dossier de ce type`);
+        sounds.error.play();
+    }
+}
+
+function readFile(filename) {
+    if(!filename) {
+        addToTerminal('Usage: cat [filename]');
+        return;
+    }
+    
+    switch(filename) {
+        case 'secret.txt':
+            addToTerminal(`
+01001100 01100001 00100000 01110110 01100101 01110010 01101001 01110100 
+01100101 00100000 01100101 01110011 01110100 00100000 01100011 01100001
+01100011 01101000 01100101 01100101 00100000 01100100 01100001 01101110 
+01110011 00100000 01101100 01100101 00100000 01100011 01101111 01100100
+01100101
+
+Indice: Essayez 'decrypt binary'`);
+            secretsFound.push('binary_message');
+            hackerLevel++;
+            break;
+            
+        case 'enigma.sh':
+            addToTerminal(`
+#!/bin/bash
+# L'énigme des trois portes
+
+echo "Trois serveurs. Trois mots de passe. Un seul accès."
+echo "ALPHA: Le premier est l'année où tout a commencé"
+echo "BETA: Le second est le nombre de membres originaux"  
+echo "GAMMA: Le dernier est notre nom de code initial"
+echo ""
+echo "ssh [serveur]:[password]"
+`);
+            secretsFound.push('enigma');
+            break;
+            
+        case 'passwords.db':
+            if(currentDirectory === '/home/underground/tools') {
+                addToTerminal('[ENCRYPTED DATABASE]\nUtilisez "decrypt passwords" avec la clé maître');
+            } else {
+                addToTerminal('Fichier non trouvé');
+            }
+            break;
+            
+        default:
+            addToTerminal(`cat: ${filename}: Aucun fichier ou dossier de ce type`);
+            sounds.error.play();
+    }
+}
+
+function initHackMode() {
+    document.body.classList.add('hack-mode');
+    sounds.hack.play();
+    
+    addToTerminal(`
+HACK MODE ACTIVÉ
+===============
+Scanning des vulnérabilités...
+[████████████████████████] 100%
+
+3 failles trouvées:
+1. Port 22 (SSH) - Authentification faible
+2. Port 80 (HTTP) - Injection SQL possible  
+3. Port 3306 (MySQL) - Mot de passe par défaut
+
+Tapez 'exploit [numéro]' pour exploiter une faille`);
+    
+    setTimeout(() => {
+        document.body.classList.remove('hack-mode');
+    }, 5000);
+}
+
+function matrixMode() {
+    const matrixCanvas = document.getElementById('matrix');
+    ctx.fillStyle = '#ff0000';
+    
+    addToTerminal('Mode Matrix: ROUGE activé');
+    showSecretMessage('La matrice a changé... voyez-vous différemment?');
+    
+    setTimeout(() => {
+        ctx.fillStyle = '#00ff00';
+        addToTerminal('Mode Matrix: retour à la normale');
+    }, 10000);
+}
+
+function showIdentity() {
+    const identities = [
+        'root@underground_society',
+        'Un fantôme dans la machine',
+        'Celui qui cherche la vérité',
+        'L\'architecte du chaos',
+        '0x4e554c4c'
+    ];
+    
+    const identity = identities[Math.min(hackerLevel, identities.length - 1)];
+    addToTerminal(identity);
+    
+    if(hackerLevel >= 3) {
+        showSecretMessage(`Niveau de hacker: ${hackerLevel}. Continuez à explorer...`);
+    }
+}
+
+function pingServer(host) {
+    if(!host) {
+        addToTerminal('Usage: ping [host]');
+        return;
+    }
+    
+    const servers = {
+        'lspd.gov': 'PING lspd.gov (192.168.1.1): 56 bytes\nHost seems down (filtered)',
+        'underground.onion': 'PING underground.onion (10.0.0.1): 56 bytes\n64 bytes from 10.0.0.1: time=0.42 ms',
+        'alpha': 'PING alpha (172.16.0.10): Connection établie. Utilisez SSH pour vous connecter.',
+        'beta': 'PING beta (172.16.0.20): Connection établie. Utilisez SSH pour vous connecter.',
+        'gamma': 'PING gamma (172.16.0.30): Connection établie. Utilisez SSH pour vous connecter.'
+    };
+    
+    const response = servers[host] || `ping: cannot resolve ${host}: Unknown host`;
+    addToTerminal(response);
+}
+
+function sshConnect(target) {
+    if(!target) {
+        addToTerminal('Usage: ssh [user@]host[:password]');
+        return;
+    }
+    
+    const [server, password] = target.split(':');
+    
+    // Easter egg: Les trois serveurs de l'énigme
+    if(server === 'alpha' && password === '2014') {
+        addToTerminal('Connection à ALPHA réussie...');
+        setTimeout(() => {
+            showASCIIArt('alpha');
+            secretsFound.push('alpha_server');
+            hackerLevel += 2;
+        }, 1000);
+    } else if(server === 'beta' && password === '5') {
+        addToTerminal('Connection à BETA réussie...');
+        setTimeout(() => {
+            showASCIIArt('beta');
+            secretsFound.push('beta_server');
+            hackerLevel += 2;
+        }, 1000);
+    } else if(server === 'gamma' && password === 'null_sector') {
+        addToTerminal('Connection à GAMMA réussie...');
+        setTimeout(() => {
+            showASCIIArt('gamma');
+            if(secretsFound.includes('alpha_server') && secretsFound.includes('beta_server')) {
+                unlockMasterSecret();
+            }
+        }, 1000);
+    } else {
+        addToTerminal('Permission denied (publickey,password).');
+        sounds.error.play();
+    }
+}
+
+function decrypt(code) {
+    if(!code) {
+        addToTerminal('Usage: decrypt [code/type]');
+        return;
+    }
+    
+    if(code === 'binary' && secretsFound.includes('binary_message')) {
+        addToTerminal('Décryptage...\n"La verite est cachee dans le code"\n\nBravo! +10 points de hacker');
+        hackerLevel += 10;
+        showSecretMessage('Premier secret découvert!');
+    } else if(code === 'passwords' && hackerLevel >= 15) {
+        addToTerminal(`
+Base de données décryptée:
+========================
+FBR_admin:c0rrupt10n
+LSPD_chief:d1rty_c0p
+EMS_director:m3d1c4l_fr4ud
+Prosecutor:1ll3g4l_0ps
+        
+Ces informations sont explosives...`);
+        secretsFound.push('passwords_decrypted');
+        createGlitchWindow('ALERTE: Intrusion détectée! Traçage en cours...');
+    } else {
+        addToTerminal('Clé de décryptage invalide ou niveau insuffisant');
+        sounds.error.play();
+    }
+}
+
+function whiteRabbit() {
+    addToTerminal('Suivez le lapin blanc...');
+    document.body.style.transition = 'transform 2s';
+    document.body.style.transform = 'rotateY(360deg)';
+    
+    setTimeout(() => {
+        showASCIIArt('rabbit');
+        showSecretMessage('Bienvenue dans le terrier du lapin...');
+        hackerLevel += 5;
+        
+        // Débloquer un terminal secret
+        createSecretTerminal();
+    }, 2000);
+}
+
+function theAnswer() {
+    addToTerminal(`
+La réponse à la grande question sur la vie, l'univers et le reste...
+
+42
+
+Mais quelle était la question?`);
+    
+    if(hackerLevel >= 20) {
+        setTimeout(() => {
+            addToTerminal('\nLa question: Combien de lignes de code pour hacker Los Santos?');
+            showSecretMessage('Deep Thought approuve votre sagesse.');
+        }, 3000);
+    }
+}
+
+function sudoCommand(cmd) {
+    if(cmd === 'rm -rf /' || cmd === 'rm -rf / --no-preserve-root') {
+        addToTerminal('[sudo] Mot de passe pour underground:');
+        setTimeout(() => {
+            document.body.style.transition = 'opacity 2s';
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                document.body.innerHTML = '<h1 style="color: #00ff00; text-align: center; margin-top: 50vh;">System deleted. Goodbye.</h1>';
+            }, 2000);
+        }, 1000);
+    } else {
+        addToTerminal('underground n\'est pas dans le fichier sudoers. Cet incident sera signalé.');
+        sounds.error.play();
+    }
+}
+
+// Suite du code à partir de networkScan()
+function networkScan() {
+    addToTerminal('Lancement de nmap...');
+    const scanResult = `
+Starting Nmap 7.92
+Nmap scan report for local network
+
+Host: 192.168.1.1 (LSPD-MAINFRAME)
+PORT     STATE  SERVICE
+22/tcp   open   ssh
+80/tcp   open   http
+443/tcp  open   https
+3306/tcp open   mysql
+
+Host: 192.168.1.50 (FBR-SERVER-01)  
+PORT     STATE  SERVICE
+445/tcp  open   microsoft-ds
+3389/tcp open   ms-wbt-server
+
+Host: 192.168.1.100 (UNDERGROUND-NODE-1)
+PORT     STATE  SERVICE
+1337/tcp open   [unknown]
+8080/tcp open   http-proxy
+9999/tcp open   [classified]
+
+Host: 10.0.0.42 (GHOST-SERVER)
+PORT     STATE  SERVICE
+666/tcp  open   doom
+1984/tcp open   bigbrother
+2600/tcp open   hackers-delight
+
+Nmap done: 4 IP addresses scanned`;
+    
+    setTimeout(() => {
+        addToTerminal(scanResult);
+        if(!secretsFound.includes('ghost_server')) {
+            showSecretMessage('Un serveur fantôme détecté sur 10.0.0.42...');
+            secretsFound.push('ghost_server');
+        }
+    }, 2000);
+}
+
+function hurricaneVirus() {
+    sounds.error.play();
+    document.body.innerHTML += '<div class="virus-text">SYSTÈME COMPROMIS</div>';
+    document.querySelector('.virus-text').style.display = 'block';
+    
+    setTimeout(() => {
+        document.querySelectorAll('*').forEach(el => {
+            el.classList.add('virus-active');
         });
+        
+        // Binary rain effect
+        initBinaryRain();
+        
+        setTimeout(() => {
+            document.body.classList.add('corrupted');
+            document.body.innerHTML = `
+                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+                    <h1 style="color: #ff0000; font-size: 48px; text-shadow: 0 0 20px #ff0000;">HURRICANE DETECTED</h1>
+                    <p style="color: #ff0000; font-size: 24px; margin-top: 20px;">SYSTÈME DÉTRUIT</p>
+                    <p style="color: #00ff00; font-size: 16px; margin-top: 40px;">root@underground:~$ rm -rf / --no-preserve-root</p>
+                    <p style="color: #00ff00; font-size: 16px; margin-top: 10px;">Suppression en cours...</p>
+                    <p style="color: #fff; font-size: 12px; margin-top: 30px; opacity: 0.5;">Appuyez sur F5 pour reboot</p>
+                </div>
+            `;
+        }, 2000);
+    }, 1000);
+}
+
+function unknownCommand(cmd) {
+    // Easter egg caché pour les commandes spécifiques
+    const hiddenCommands = {
+        'ghost': () => {
+            addToTerminal('Connexion au serveur fantôme...');
+            setTimeout(() => {
+                showASCIIArt('ghost');
+                hackerLevel += 3;
+            }, 1000);
+        },
+        'glitch': () => {
+            document.body.style.animation = 'glitch 0.3s infinite';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 3000);
+            addToTerminal('Reality.exe has stopped working');
+        },
+        'backdoor': () => {
+            if(hackerLevel >= 25) {
+                addToTerminal('Backdoor activée. Accès root obtenu.');
+                showSecretMessage('Félicitations! Vous avez trouvé la backdoor secrète!');
+                unlockAdminPanel();
+            } else {
+                addToTerminal('Accès refusé. Niveau de hacker insuffisant.');
+            }
+        },
+        'konami': () => {
+            addToTerminal('↑ ↑ ↓ ↓ ← → ← → B A');
+            showSecretMessage('Code Konami reconnu!');
+        }
+    };
+    
+    if(hiddenCommands[cmd]) {
+        hiddenCommands[cmd]();
+    } else {
+        addToTerminal(`bash: ${cmd}: commande introuvable`);
+        sounds.error.play();
+    }
+}
+
+// Fonctions helper
+function addToTerminal(text) {
+    const newLine = document.createElement('div');
+    newLine.style.marginTop = '10px';
+    newLine.innerHTML = text.replace(/\n/g, '<br>');
+    terminalContent.appendChild(newLine);
+    terminalContent.scrollTop = terminalContent.scrollHeight;
+}
+
+function showSecretMessage(message) {
+    const secretMsg = document.getElementById('secretMessage');
+    secretMsg.textContent = message;
+    secretMsg.classList.add('show');
+    sounds.success.play();
+    
+    setTimeout(() => {
+        secretMsg.classList.remove('show');
+    }, 5000);
+}
+
+function showASCIIArt(type) {
+    const asciiArt = document.getElementById('asciiArt');
+    const arts = {
+        'alpha': `
+    ▄▄▄       ██▓     ██▓███   ██░ ██  ▄▄▄      
+   ▒████▄    ▓██▒    ▓██░  ██▒▓██░ ██▒▒████▄    
+   ▒██  ▀█▄  ▒██░    ▓██░ ██▓▒▒██▀▀██░▒██  ▀█▄  
+   ░██▄▄▄▄██ ▒██░    ▒██▄█▓▒ ▒░▓█ ░██ ░██▄▄▄▄██ 
+    ▓█   ▓██▒░██████▒▒██▒ ░  ░░▓█▒░██▓ ▓█   ▓██▒
+    ▒▒   ▓▒█░░ ▒░▓  ░▒▓▒░ ░  ░ ▒ ░░▒░▒ ▒▒   ▓▒█░
+     ▒   ▒▒ ░░ ░ ▒  ░░▒ ░      ▒ ░▒░ ░  ▒   ▒▒ ░
+     ░   ▒     ░ ░   ░░        ░  ░░ ░  ░   ▒   
+         ░  ░    ░  ░          ░  ░  ░      ░  ░
+                                                 
+    SERVEUR ALPHA - ACCÈS AUTORISÉ`,
+        
+        'beta': `
+    ▄▄▄▄   ▓█████▄▄▄█████▓ ▄▄▄      
+   ▓█████▄ ▓█   ▀▓  ██▒ ▓▒▒████▄    
+   ▒██▒ ▄██▒███  ▒ ▓██░ ▒░▒██  ▀█▄  
+   ▒██░█▀  ▒▓█  ▄░ ▓██▓ ░ ░██▄▄▄▄██ 
+   ░▓█  ▀█▓░▒████▒ ▒██▒ ░  ▓█   ▓██▒
+   ░▒▓███▀▒░░ ▒░ ░ ▒ ░░    ▒▒   ▓▒█░
+   ▒░▒   ░  ░ ░  ░   ░      ▒   ▒▒ ░
+    ░    ░    ░    ░        ░   ▒   
+    ░         ░  ░              ░  ░
+         ░                          
+    SERVEUR BETA - CONNEXION ÉTABLIE`,
+        
+        'gamma': `
+     ▄████  ▄▄▄       ███▄ ▄███▓ ███▄ ▄███▓ ▄▄▄      
+    ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓██▒▀█▀ ██▒▒████▄    
+   ▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▓██    ▓██░▒██  ▀█▄  
+   ░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒██    ▒██ ░██▄▄▄▄██ 
+   ░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒▒██▒   ░██▒ ▓█   ▓██▒
+    ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░ ▒░   ░  ░ ▒▒   ▓▒█░
+     ░   ░   ▒   ▒▒ ░░  ░      ░░  ░      ░  ▒   ▒▒ ░
+   ░ ░   ░   ░   ▒   ░      ░   ░      ░     ░   ▒   
+         ░       ░  ░       ░          ░         ░  ░
+                                                      
+    SERVEUR GAMMA - NOYAU PRINCIPAL DÉVERROUILLÉ`,
+        
+        'rabbit': `
+            (\\_/)
+           ( o.o )
+            > ^ <
+           /|   |\\
+          (_)   (_)
+          
+    Follow the White Rabbit...`,
+        
+        'ghost': `
+         .-.
+        (o o)
+        | O \\
+         \\   \\
+          `~~~'
+          
+    GHOST IN THE MACHINE`,
+        
+        'skull': `
+         ___________
+        /           \\
+       /  _       _  \\
+      |  (_)     (_)  |
+      |       _       |
+      |     \\___/     |
+       \\             /
+        \\___________/
+        
+    DANGER: ZONE INTERDITE`
+    };
+    
+    if(arts[type]) {
+        asciiArt.textContent = arts[type];
+        asciiArt.style.display = 'block';
+        
+        setTimeout(() => {
+            asciiArt.style.display = 'none';
+        }, 5000);
+    }
+}
+
+function createGlitchWindow(message) {
+    const glitchWindow = document.createElement('div');
+    glitchWindow.className = 'glitch-window';
+    glitchWindow.style.display = 'block';
+    glitchWindow.style.left = Math.random() * (window.innerWidth - 400) + 'px';
+    glitchWindow.style.top = Math.random() * (window.innerHeight - 300) + 'px';
+    
+    glitchWindow.innerHTML = `
+        <div class="glitch-window-header">ALERTE SYSTÈME</div>
+        <div style="padding: 20px; color: #ff0000;">
+            ${message}
+            <div style="margin-top: 20px;">
+                <div style="background: #ff0000; height: 20px; animation: pulse 0.5s infinite;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(glitchWindow);
+    sounds.error.play();
+    
+    // Draggable window
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    
+    const header = glitchWindow.querySelector('.glitch-window-header');
+    
+    header.addEventListener('mousedown', (e) => {
+        initialX = e.clientX - glitchWindow.offsetLeft;
+        initialY = e.clientY - glitchWindow.offsetTop;
+        isDragging = true;
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+        if(isDragging) {
+            e.preventDefault();
+            currentX = e.clientX - initialX;
+            currentY = e.clientY - initialY;
+            glitchWindow.style.left = currentX + 'px';
+            glitchWindow.style.top = currentY + 'px';
+        }
+    });
+    
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+    });
+    
+    // Auto close after 10 seconds
+    setTimeout(() => {
+        glitchWindow.remove();
+    }, 10000);
+}
+
+function initBinaryRain() {
+    const binaryCanvas = document.getElementById('binaryRain');
+    const binaryCtx = binaryCanvas.getContext('2d');
+    
+    binaryCanvas.style.display = 'block';
+    binaryCanvas.width = window.innerWidth;
+    binaryCanvas.height = window.innerHeight;
+    
+    const binary = "01";
+    const binaryArray = binary.split("");
+    
+    const fontSize = 14;
+    const columns = binaryCanvas.width / fontSize;
+    
+    const drops = [];
+    for(let x = 0; x < columns; x++) {
+        drops[x] = 1;
+    }
+    
+    function drawBinary() {
+        binaryCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        binaryCtx.fillRect(0, 0, binaryCanvas.width, binaryCanvas.height);
+        
+        binaryCtx.fillStyle = '#ff0000';
+        binaryCtx.font = fontSize + 'px monospace';
+        
+        for(let i = 0; i < drops.length; i++) {
+            const text = binaryArray[Math.floor(Math.random() * binaryArray.length)];
+            binaryCtx.fillText(text, i * fontSize, drops[i] * fontSize);
+            
+            if(drops[i] * fontSize > binaryCanvas.height && Math.random() > 0.975) {
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+    
+    setInterval(drawBinary, 50);
+}
+
+function unlockMasterSecret() {
+    addToTerminal(`
+╔═══════════════════════════════════════╗
+║     ACCÈS MAÎTRE DÉVERROUILLÉ        ║
+║                                       ║
+║  Félicitations, vous avez résolu      ║
+║  l'énigme des trois serveurs!         ║
+║                                       ║
+║  Récompense: Accès au Noyau Central  ║
+║  Commande débloquée: 'access core'    ║
+╚═══════════════════════════════════════╝`);
+    
+    secretsFound.push('master_access');
+    hackerLevel += 20;
+    
+    // Débloquer une nouvelle commande
+    processCommand.accessCore = function() {
+        showCoreInterface();
+    };
+}
+
+function createSecretTerminal() {
+    const secretTerminal = document.createElement('div');
+    secretTerminal.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 400px;
+        height: 300px;
+        background: rgba(0, 0, 0, 0.9);
+        border: 1px solid #ff00ff;
+        padding: 10px;
+        font-family: monospace;
+        color: #ff00ff;
+        z-index: 10000;
+        overflow-y: auto;
+    `;
+    
+    secretTerminal.innerHTML = `
+        <div style="border-bottom: 1px solid #ff00ff; padding-bottom: 5px; margin-bottom: 10px;">
+            TERMINAL SECRET - WONDERLAND
+        </div>
+        <div>
+            Bienvenue de l'autre côté du miroir.<br><br>
+            Ici, les règles sont différentes.<br>
+            Les commandes normales ne fonctionnent pas.<br><br>
+            Essayez: 'dream', 'wake', 'pill red', 'pill blue'
+        </div>
+        <input type="text" style="background: none; border: none; color: #ff00ff; width: 100%; outline: none; margin-top: 10px;" placeholder="wonderland:~$" />
+    `;
+    
+    document.body.appendChild(secretTerminal);
+    
+    const secretInput = secretTerminal.querySelector('input');
+    secretInput.addEventListener('keypress', function(e) {
+        if(e.key === 'Enter') {
+            const cmd = this.value.toLowerCase();
+            
+            if(cmd === 'dream') {
+                this.value = '';
+                secretTerminal.innerHTML += '<div>Vous êtes déjà en train de rêver...</div>';
+            } else if(cmd === 'wake') {
+                secretTerminal.remove();
+                document.body.style.filter = 'invert(1)';
+                setTimeout(() => {
+                    document.body.style.filter = '';
+                }, 1000);
+            } else if(cmd === 'pill red') {
+                this.value = '';
+                secretTerminal.innerHTML += '<div>La vérité vous sera révélée... Niveau Master débloqué!</div>';
+                hackerLevel = 50;
+                showSecretMessage('Vous avez atteint le niveau MASTER HACKER!');
+            } else if(cmd === 'pill blue') {
+                this.value = '';
+                secretTerminal.innerHTML += '<div>Retour à l\'ignorance...</div>';
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        }
+    });
+}
+
+function unlockAdminPanel() {
+    const adminPanel = document.createElement('div');
+    adminPanel.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #00ff00;
+        padding: 30px;
+        z-index: 10000;
+        font-family: monospace;
+    `;
+    
+    adminPanel.innerHTML = `
+        <h2 style="color: #00ff00; text-align: center; margin-bottom: 20px;">PANNEAU D'ADMINISTRATION</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <button onclick="document.body.style.transform='rotateX(180deg)'" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">FLIP REALITY</button>
+            <button onclick="document.querySelectorAll('*').forEach(el => el.style.color = '#' + Math.floor(Math.random()*16777215).toString(16))" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">CHAOS MODE</button>
+            <button onclick="alert('Coordonnées GPS du QG: 34.0522°N 118.2437°W')" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">REVEAL HQ</button>
+            <button onclick="document.body.contentEditable = true" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">EDIT MODE</button>
+        </div>
+        <button onclick="this.parentElement.remove()" style="width: 100%; margin-top: 20px; background: #ff0000; color: #fff; border: none; padding: 10px; cursor: pointer;">CLOSE</button>
+    `;
+    
+    document.body.appendChild(adminPanel);
+}
+
+// Konami Code sur toute la page
+let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+let konamiIndex = 0;
+
+document.addEventListener('keydown', function(e) {
+    if(e.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if(konamiIndex === konamiCode.length) {
+            document.body.style.transform = 'rotate(180deg)';
+            setTimeout(() => {
+                alert('KONAMI CODE ACTIVÉ!\n\nVous avez débloqué le mode développeur.\nTapez "backdoor" dans le terminal.');
+                document.body.style.transform = '';
+                hackerLevel += 10;
+            }, 1000);
+            konamiIndex = 0;
+        }
+    } else {
+        konamiIndex = 0;
+    }
+});
+
+// Hurricane detection globale
+let hurricaneBuffer = '';
+let hurricaneTyped = false;
+
+document.addEventListener('keypress', function(e) {
+    if(!hurricaneTyped && e.target !== commandInput) {
+        hurricaneBuffer += e.key.toLowerCase();
+        
+        if(hurricaneBuffer.includes('hurricane')) {
+            hurricaneTyped = true;
+            commandInput.value = 'hurricane';
+            const event = new KeyboardEvent('keypress', { key: 'Enter' });
+            commandInput.dispatchEvent(event);
+        }
+        
+        if(hurricaneBuffer.length > 20) {
+            hurricaneBuffer = hurricaneBuffer.slice(-10);
+        }
+    }
+});
+
+// Glitch effect on scroll
+window.addEventListener('scroll', function() {
+    const glitchElements = document.querySelectorAll('.section-title');
+    glitchElements.forEach(el => {
+        if(Math.random() > 0.95) {
+            el.style.textShadow = `${Math.random() * 10}px ${Math.random() * 10}px rgba(0, 255, 0, 0.5)`;
+            setTimeout(() => {
+                el.style.textShadow = '';
+            }, 100);
+        }
+    });
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    addToTerminal('Système initialisé. Tapez "help" pour commencer votre exploration...');
+    
+    // Random glitch effect
+    setInterval(() => {
+        if(Math.random() > 0.98) {
+            document.body.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+            setTimeout(() => {
+                document.body.style.filter = '';
+            }, 100);
+        }
+    }, 5000);
+});
+
     </script>
 </body>
 </html>
