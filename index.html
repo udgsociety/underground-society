@@ -20,7 +20,48 @@
             overflow-x: hidden;
             cursor: crosshair;
         }
-        
+
+        /* Virus decomposition effect */
+.virus-active {
+    animation: virus-glitch 2s infinite;
+}
+
+@keyframes virus-glitch {
+    0% { transform: translate(0); }
+    10% { transform: translate(-5px, 5px) rotate(1deg); }
+    20% { transform: translate(5px, -5px) rotate(-1deg); }
+    30% { transform: translate(-10px, 5px) rotate(2deg); opacity: 0.8; }
+    40% { transform: translate(10px, -10px) rotate(-2deg); }
+    50% { transform: translate(-15px, 15px) rotate(3deg); opacity: 0.6; }
+    60% { transform: translate(15px, -15px) rotate(-3deg); }
+    70% { transform: translate(-20px, 20px) rotate(5deg); opacity: 0.4; }
+    80% { transform: translate(20px, -20px) rotate(-5deg); }
+    90% { transform: translate(-30px, 30px) rotate(10deg); opacity: 0.2; }
+    100% { transform: translate(50px, -50px) rotate(15deg); opacity: 0; }
+}
+
+.virus-text {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 72px;
+    color: #ff0000;
+    text-shadow: 0 0 20px #ff0000;
+    z-index: 9999;
+    display: none;
+}
+
+.corrupted {
+    background: repeating-linear-gradient(
+        0deg,
+        #ff0000,
+        #ff0000 2px,
+        #000000 2px,
+        #000000 4px
+    );
+    color: #ff0000 !important;
+}
         /* Terminal effect */
         body::before {
             content: " ";
@@ -752,6 +793,54 @@ La suite viendra à ceux qui comprennent.<br>
                 this.value = '';
             }
         });
+
+        // Terminal input functionality
+const commandInput = document.querySelector('.command-input');
+commandInput.addEventListener('keypress', function(e) {
+    if(e.key === 'Enter') {
+        const command = this.value.toLowerCase();
+        
+        if(command === 'help') {
+            alert('COMMANDS:\n\nhelp - Show this message\nmanifeste - Read our story\nobjectifs - View operational objectives\nmembres - Current members status\nrecrutement - Join us\nclear - Clear terminal\nhurricane - [UNKNOWN COMMAND]');
+        } else if(command === 'hurricane') {
+            // Virus activation
+            document.body.innerHTML += '<div class="virus-text">SYSTÈME COMPROMIS</div>';
+            document.querySelector('.virus-text').style.display = 'block';
+            
+            setTimeout(() => {
+                document.querySelectorAll('*').forEach(el => {
+                    el.classList.add('virus-active');
+                });
+                
+                setTimeout(() => {
+                    document.body.classList.add('corrupted');
+                    document.body.innerHTML = `
+                        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
+                            <h1 style="color: #ff0000; font-size: 48px; text-shadow: 0 0 20px #ff0000;">HURRICANE DETECTED</h1>
+                            <p style="color: #ff0000; font-size: 24px; margin-top: 20px;">SYSTÈME DÉTRUIT</p>
+                            <p style="color: #00ff00; font-size: 16px; margin-top: 40px;">root@underground:~$ rm -rf / --no-preserve-root</p>
+                            <p style="color: #00ff00; font-size: 16px; margin-top: 10px;">Suppression en cours...</p>
+                        </div>
+                    `;
+                    
+                    // Matrix effect becomes red
+                    const canvas = document.getElementById('matrix');
+                    if(canvas) {
+                        const ctx = canvas.getContext('2d');
+                        ctx.fillStyle = '#ff0000';
+                    }
+                }, 2000);
+            }, 1000);
+            
+        } else if(command === 'clear') {
+            location.reload();
+        } else if(command) {
+            alert('Command not found. Type "help" for available commands.');
+        }
+        
+        this.value = '';
+    }
+});
         
         // Glitch effect on scroll
         window.addEventListener('scroll', function() {
