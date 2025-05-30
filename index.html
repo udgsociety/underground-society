@@ -309,6 +309,14 @@
 
     <script>
         window.onload = () => {
+            // --- Script-scoped variables ---
+            let terminalOutput, terminalInput, promptElement;
+            let currentUser = 'guest';
+            let currentDirectory = '/';
+            let accessLevel = 0;
+            const commandHistory = []; 
+            let historyIndex = -1;   
+
             // --- Musique Personnalisée ---
             const customMusicUrl = ""; 
 
@@ -543,16 +551,8 @@
                     return win ? win.querySelector('.window-content') : null;
                 }
             }
-            windowManager = new WindowManager('desktop'); // Initialize after desktop div is available
+            let windowManager = new WindowManager('desktop'); 
 
-            // --- Terminal Logic & File System ---
-            // terminalOutput, terminalInput, promptElement will be set when terminal window is created
-            currentUser = 'guest';
-            currentDirectory = '/';
-            accessLevel = 0; 
-            commandHistory.length = 0; // Clear history on reload
-            historyIndex = -1;
-            
             const fileSystem = {
                 '/': { type: 'directory', children: ['readme.txt', 'login.sh', 'sys/', 'users/', 'docs/', 'data/'], owner: 'root', permissions: 'rwxr-xr-x' },
                 '/readme.txt': { type: 'file', content: [
@@ -641,7 +641,7 @@
             }
 
             function updatePrompt() {
-                if (!promptElement) return; // Guard clause
+                if (!promptElement) return; 
                 const userColor = accessLevel > 0 ? (accessLevel === 1 ? 'text-green-400' : (accessLevel === 2 ? 'text-blue-400' : 'text-red-500')) : 'text-gray-500';
                 promptElement.innerHTML = `<span class="${userColor}">${currentUser}@nyx-os</span>:<span class="text-purple-400">${currentDirectory}</span>$ `;
             }
