@@ -3,1819 +3,1397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NULL_SECTOR - Access Granted</title>
+    <title>NyxOS v0.9 - Obsidian Veil</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        :root {
+            --primary-color: #00FF41; /* Vert phosphorescent principal */
+            --secondary-color: #0DFFFF; /* Cyan électrique */
+            --tertiary-color: #9D00FF; /* Violet néon */
+            --error-color: #FF0033; /* Rouge vif */
+            --warning-color: #FFD700; /* Or/Jaune pour avertissements */
+            
+            --background-color: #030508; /* Noir bleuté très sombre */
+            --background-glow: rgba(0, 255, 65, 0.05); /* Aura verte subtile */
+            
+            --window-bg-color: rgba(10, 20, 30, 0.8); /* Fond de fenêtre bleu-noir semi-transparent */
+            --window-border-color: var(--secondary-color);
+            --window-header-bg: rgba(0, 30, 40, 0.9);
+
+            --font-main: 'Roboto Mono', monospace;
+            --font-display: 'Share Tech Mono', monospace; /* Pour les titres, prompts */
+            --font-pixel: 'VT323', monospace; /* Pour les éléments rétro */
+
+            --text-glow-primary: 0 0 5px var(--primary-color), 0 0 10px var(--primary-color);
+            --text-glow-secondary: 0 0 5px var(--secondary-color), 0 0 10px var(--secondary-color);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 10px var(--background-glow), 0 0 20px var(--background-glow); }
+            50% { box-shadow: 0 0 20px var(--background-glow), 0 0 40px var(--background-glow); }
+        }
         
-        * {
+        @keyframes subtleScanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100%; }
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--background-color);
+            color: var(--primary-color);
+            overflow: hidden;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            animation: fadeIn 1.5s ease-out;
+            /* Nouveau fond animé */
+            background: 
+                linear-gradient(rgba(0,0,0,0.95), rgba(0,0,0,0.95)),
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(var(--secondary-color-rgb, 13, 255, 255), 0.02),
+                    rgba(var(--secondary-color-rgb, 13, 255, 255), 0.02) 1px,
+                    transparent 1px,
+                    transparent 60px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(var(--primary-color-rgb, 0, 255, 65), 0.02),
+                    rgba(var(--primary-color-rgb, 0, 255, 65), 0.02) 1px,
+                    transparent 1px,
+                    transparent 60px
+                ),
+                var(--background-color);
+            background-size: cover, 60px 60px, 60px 60px, cover;
+            animation: pulseGlow 10s infinite alternate, subtleScanline 20s linear infinite;
         }
-        
-        body {
-            font-family: 'Share Tech Mono', monospace;
-            background: #000;
-            color: #00ff00;
-            overflow-x: hidden;
-            cursor: crosshair;
-        }
-        /* Easter eggs styles */
-.matrix-red {
-    color: #ff0000 !important;
-}
-
-.terminal-3d {
-    transform: perspective(1000px) rotateY(20deg);
-    transition: transform 0.5s;
-}
-
-.secret-message {
-    position: fixed;
-    bottom: -100px;
-    right: 20px;
-    background: #00ff00;
-    color: #000;
-    padding: 20px;
-    border: 2px solid #fff;
-    font-family: monospace;
-    transition: bottom 0.5s;
-    z-index: 9999;
-}
-
-.secret-message.show {
-    bottom: 20px;
-}
-
-.hack-mode {
-    animation: hack-pulse 0.5s infinite;
-}
-
-@keyframes hack-pulse {
-    0% { filter: brightness(1); }
-    50% { filter: brightness(1.5) hue-rotate(180deg); }
-    100% { filter: brightness(1); }
-}
-
-.ascii-art {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: monospace;
-    font-size: 14px;
-    color: #00ff00;
-    white-space: pre;
-    line-height: 1;
-    z-index: 9999;
-    display: none;
-}
-
-.glitch-window {
-    position: fixed;
-    width: 400px;
-    height: 300px;
-    background: #000;
-    border: 1px solid #00ff00;
-    z-index: 9999;
-    display: none;
-}
-
-.glitch-window-header {
-    background: #00ff00;
-    color: #000;
-    padding: 5px;
-    cursor: move;
-}
-
-.binary-rain {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 9998;
-    display: none;
-}
-
-        /* Virus decomposition effect */
-.virus-active {
-    animation: virus-glitch 2s infinite;
-}
-
-@keyframes virus-glitch {
-    0% { transform: translate(0); }
-    10% { transform: translate(-5px, 5px) rotate(1deg); }
-    20% { transform: translate(5px, -5px) rotate(-1deg); }
-    30% { transform: translate(-10px, 5px) rotate(2deg); opacity: 0.8; }
-    40% { transform: translate(10px, -10px) rotate(-2deg); }
-    50% { transform: translate(-15px, 15px) rotate(3deg); opacity: 0.6; }
-    60% { transform: translate(15px, -15px) rotate(-3deg); }
-    70% { transform: translate(-20px, 20px) rotate(5deg); opacity: 0.4; }
-    80% { transform: translate(20px, -20px) rotate(-5deg); }
-    90% { transform: translate(-30px, 30px) rotate(10deg); opacity: 0.2; }
-    100% { transform: translate(50px, -50px) rotate(15deg); opacity: 0; }
-}
-
-.virus-text {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 72px;
-    color: #ff0000;
-    text-shadow: 0 0 20px #ff0000;
-    z-index: 9999;
-    display: none;
-}
-
-.corrupted {
-    background: repeating-linear-gradient(
-        0deg,
-        #ff0000,
-        #ff0000 2px,
-        #000000 2px,
-        #000000 4px
-    );
-    color: #ff0000 !important;
-}
-        /* Terminal effect */
+        /* Pour que les variables RGB fonctionnent avec rgba() */
         body::before {
-            content: " ";
-            display: block;
+            content: "";
+            position: absolute;
+            top:0; left:0; width:1px; height:1px;
+            --primary-color-rgb: 0, 255, 65;
+            --secondary-color-rgb: 13, 255, 255;
+        }
+
+
+        .scanline-overlay { /* Conserver pour un effet de moniteur global */
             position: fixed;
             top: 0;
             left: 0;
-            bottom: 0;
-            right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
-        }
-        
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
             width: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            border-bottom: 1px solid #00ff00;
-            padding: 20px;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(20,20,30,0) 50%,
+                rgba(0,0,0,0.25) 51%,
+                rgba(20,20,30,0) 52%
+            );
+            background-size: 100% 3px; /* Lignes plus fines */
+            animation: scanlines 0.2s linear infinite; /* Animation plus rapide pour effet de rafraîchissement */
+            opacity: 0.2; /* Plus subtil */
+            z-index: 9999;
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 3px; }
         }
         
-        .nav {
+        #desktop {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            padding: 20px; /* Espace pour les éléments décoratifs */
+            display: grid; /* Pour positionner les éléments décoratifs */
+            grid-template-columns: 1fr auto 1fr;
+            grid-template-rows: auto 1fr auto;
+        }
+        
+        /* Éléments décoratifs pour le bureau */
+        .desktop-deco {
+            position: absolute;
+            opacity: 0.3;
+            font-family: var(--font-pixel);
+            font-size: 0.8em;
+            color: var(--secondary-color);
+            pointer-events: none; /* Pour ne pas interférer avec les clics */
+            text-shadow: var(--text-glow-secondary);
+        }
+        #deco-top-left { top: 10px; left: 10px; writing-mode: vertical-rl; }
+        #deco-bottom-right { bottom: 10px; right: 10px; text-align: right;}
+        #deco-status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 5px 15px;
+            background-color: rgba(0,10,15,0.8);
+            border-top: 1px solid var(--secondary-color);
+            font-family: var(--font-display);
+            font-size: 0.9em;
+            color: var(--secondary-color);
+            display: flex;
+            justify-content: space-between;
+            z-index: 50; /* Sous les fenêtres mais au-dessus du fond */
+            backdrop-filter: blur(3px);
+        }
+        .status-item { animation: flicker 5s infinite alternate; }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+
+
+        .window {
+            position: absolute;
+            background-color: var(--window-bg-color);
+            border: 1px solid var(--window-border-color);
+            border-radius: 8px; /* Coins plus arrondis */
+            box-shadow: 0 0 15px rgba(var(--secondary-color-rgb), 0.4), 
+                        0 0 30px rgba(var(--secondary-color-rgb), 0.2),
+                        inset 0 0 5px rgba(var(--primary-color-rgb), 0.1);
+            display: flex;
+            flex-direction: column;
+            min-width: 350px; /* Légèrement plus large */
+            min-height: 250px;
+            backdrop-filter: blur(8px) saturate(120%); /* Effet verre dépoli plus prononcé */
+            resize: both; 
+            overflow: hidden; 
+            transition: box-shadow 0.3s ease, border-color 0.3s ease; /* Transitions douces */
+        }
+        .window:focus-within, .window.active-window { /* Style pour la fenêtre active */
+             border-color: var(--primary-color);
+             box-shadow: 0 0 25px rgba(var(--primary-color-rgb), 0.6), 
+                        0 0 50px rgba(var(--primary-color-rgb), 0.3),
+                        inset 0 0 10px rgba(var(--secondary-color-rgb), 0.2);
+        }
+
+
+        .window-header {
+            background-color: var(--window-header-bg);
+            padding: 8px 12px; /* Plus d'espacement */
+            cursor: move;
+            border-bottom: 1px solid var(--window-border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            max-width: 1200px;
-            margin: 0 auto;
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+            text-shadow: 0 0 3px rgba(0,0,0,0.5); /* Ombre pour le texte du titre */
         }
-        
-        .logo {
-            font-size: 24px;
-            color: #00ff00;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+
+        .window-title {
+            font-family: var(--font-display);
+            font-size: 1.3em; /* Titre plus grand */
+            color: var(--primary-color);
+            text-shadow: var(--text-glow-primary);
         }
-        
-        .logo::before {
-            content: "▓";
-            animation: blink 1s infinite;
-        }
-        
-        @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            list-style: none;
-        }
-        
-        .nav-links a {
-            color: #00ff00;
-            text-decoration: none;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
-        .nav-links a:hover {
-            color: #fff;
-            text-shadow: 0 0 10px #00ff00;
-        }
-        
-        .nav-links a::after {
-            content: "_";
-            position: absolute;
-            right: -10px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        
-        .nav-links a:hover::after {
-            opacity: 1;
-            animation: blink 0.5s infinite;
-        }
-        
-        /* Hero Section */
-        .hero {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            background: radial-gradient(circle at center, rgba(0, 255, 0, 0.1) 0%, transparent 50%);
-        }
-        
-        .terminal-window {
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00ff00;
-            padding: 20px;
-            width: 90%;
-            max-width: 800px;
-            box-shadow: 0 0 50px rgba(0, 255, 0, 0.5);
-        }
-        
-        .terminal-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #00ff00;
-        }
-        
-        .terminal-button {
-            width: 12px;
+
+        .window-buttons span {
+            display: inline-block;
+            width: 12px; /* Boutons plus visibles */
             height: 12px;
             border-radius: 50%;
-            background: #00ff00;
+            margin-left: 6px;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            border: 1px solid rgba(0,0,0,0.2);
         }
-        
-        .terminal-title {
-            flex: 1;
-            text-align: center;
-            font-size: 14px;
-            color: #00ff00;
+        .window-buttons span:hover { transform: scale(1.2); opacity: 1; }
+        .window-buttons .close-btn { background-color: var(--error-color); box-shadow: 0 0 8px var(--error-color); }
+        .window-buttons .minimize-btn { background-color: var(--warning-color); box-shadow: 0 0 8px var(--warning-color); }
+        /* Ajout d'un bouton "maximize" pour le style */
+        .window-buttons .maximize-btn { background-color: var(--secondary-color); box-shadow: 0 0 8px var(--secondary-color); }
+
+
+        .window-content {
+            flex-grow: 1;
+            padding: 15px; /* Plus d'espacement interne */
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) rgba(0,0,0,0.3);
+            line-height: 1.6; /* Meilleure lisibilité */
         }
-        
-        .terminal-content {
-            font-size: 16px;
-            line-height: 1.6;
+        .window-content::-webkit-scrollbar { width: 10px; }
+        .window-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 5px; }
+        .window-content::-webkit-scrollbar-thumb { background-color: var(--primary-color); border-radius: 5px; border: 2px solid rgba(0,0,0,0.2); }
+        .window-content::-webkit-scrollbar-thumb:hover { background-color: var(--secondary-color); }
+
+
+        /* Terminal Specific */
+        #terminal-output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            /* Effet de texte cathodique subtil */
+            text-shadow: 0 0 1px rgba(var(--primary-color-rgb), 0.5);
         }
-        
-        .typing-effect {
-            overflow: hidden;
-            white-space: nowrap;
-            animation: typing 2s steps(40, end);
+        .prompt-line { display: flex; align-items: center; margin-top: 5px; }
+        .prompt { 
+            font-family: var(--font-display);
+            margin-right: 10px; 
+            font-size: 1.1em;
         }
-        
-        @keyframes typing {
-            from { width: 0 }
-            to { width: 100% }
-        }
-        
-        .command-line {
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .prompt {
-            color: #00ff00;
-        }
-        
-        .command-input {
-            background: none;
+        .terminal-input {
+            background-color: transparent;
             border: none;
-            color: #00ff00;
-            font-family: inherit;
-            font-size: 16px;
+            color: var(--primary-color);
+            flex-grow: 1;
             outline: none;
-            flex: 1;
+            caret-color: var(--tertiary-color); /* Caret violet */
+            font-family: inherit; 
+            font-size: 1.1em; /* Input plus grand */
+            text-shadow: var(--text-glow-primary);
         }
-        
-        /* Sections */
-        .section {
-            padding: 80px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-            border-top: 1px solid #00ff00;
-        }
-        
-        .section-title {
-            font-size: 32px;
-            margin-bottom: 40px;
-            position: relative;
-            padding-left: 20px;
-        }
-        
-        .section-title::before {
-            content: ">";
-            position: absolute;
-            left: 0;
-            animation: blink 1s infinite;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-        
-        .card {
-            background: rgba(0, 255, 0, 0.05);
-            border: 1px solid #00ff00;
-            padding: 30px;
-            transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .card:hover {
-            background: rgba(0, 255, 0, 0.1);
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
-            transform: translateY(-5px);
-        }
-        
-        .card::before {
-            content: "";
-            position: absolute;
-            top: -100%;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(transparent, rgba(0, 255, 0, 0.2), transparent);
-            transition: top 0.5s;
-        }
-        
-        .card:hover::before {
-            top: 100%;
-        }
-        
-        .card h3 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #fff;
-        }
-        
-        .card p {
-            font-size: 14px;
-            line-height: 1.6;
-            color: #00ff00;
-        }
-        
-        /* Code blocks */
-        .code-block {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00ff00;
-            padding: 20px;
-            margin: 20px 0;
-            font-family: 'Share Tech Mono', monospace;
-            overflow-x: auto;
-        }
-        
-        .code-block code {
-            color: #00ff00;
-            font-size: 14px;
-        }
-        
-        /* Glitch effect */
-        .glitch {
-            position: relative;
-            color: #00ff00;
-            font-size: 48px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                        -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
-                        0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-            animation: glitch 500ms infinite;
-        }
-        
-        @keyframes glitch {
-            0% {
-                text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                            -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
-                            0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-            15% {
-                text-shadow: 0.05em 0 0 rgba(255, 0, 0, 0.75),
-                            -0.025em -0.05em 0 rgba(0, 255, 0, 0.75),
-                            0.025em 0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-            16% {
-                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                            0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                            -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-            49% {
-                text-shadow: -0.05em -0.025em 0 rgba(255, 0, 0, 0.75),
-                            0.025em 0.025em 0 rgba(0, 255, 0, 0.75),
-                            -0.05em -0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-            50% {
-                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
-                            0.05em 0 0 rgba(0, 255, 0, 0.75),
-                            0 -0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-            99% {
-                text-shadow: 0.025em 0.05em 0 rgba(255, 0, 0, 0.75),
-                            0.05em 0 0 rgba(0, 255, 0, 0.75),
-                            0 -0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-            100% {
-                text-shadow: -0.025em 0 0 rgba(255, 0, 0, 0.75),
-                            -0.025em -0.025em 0 rgba(0, 255, 0, 0.75),
-                            -0.025em -0.05em 0 rgba(0, 0, 255, 0.75);
-            }
-        }
-        
-        /* Matrix rain background */
-        .matrix-bg {
+        .terminal-input::placeholder { color: rgba(var(--primary-color-rgb), 0.4); }
+
+
+        .error { color: var(--error-color); font-weight: bold; text-shadow: 0 0 5px var(--error-color); }
+        .info { color: var(--secondary-color); text-shadow: 0 0 3px var(--secondary-color); }
+        .success { color: #66FF66; /* Vert plus vif pour succès */ text-shadow: 0 0 5px #66FF66; } 
+        .warning { color: var(--warning-color); font-weight: bold; text-shadow: 0 0 5px var(--warning-color); }
+        .filename { color: #A0FFA0; /* Vert pastel pour fichiers */ } 
+        .dirname { color: #A0D8FF; /* Bleu pastel pour dossiers */ } 
+
+        /* Boot Sequence Styling */
+        #boot-screen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            opacity: 0.1;
-            z-index: 1;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            color: var(--primary-color);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-pixel);
+            font-size: 1.6em; /* Texte de boot plus grand */
+            padding: 20px;
+            text-align: left;
+            text-shadow: var(--text-glow-primary);
         }
-        
-        /* Footer */
-        .footer {
-            text-align: center;
-            padding: 40px 20px;
-            border-top: 1px solid #00ff00;
-            background: rgba(0, 0, 0, 0.9);
+        #boot-text p { margin-bottom: 8px; }
+        #boot-progress-bar-container { width: 80%; max-width: 600px; height: 25px; border: 2px solid var(--primary-color); margin-top: 25px; border-radius: 3px; padding: 2px; }
+        #boot-progress-bar { width: 0%; height: 100%; background: 
+            linear-gradient(45deg, var(--primary-color), var(--secondary-color)); 
+            transition: width 0.2s linear; border-radius: 2px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
         }
+        .nyx-logo-boot { font-size: 2.5em; margin-bottom: 25px; text-shadow: 0 0 15px var(--primary-color), 0 0 25px var(--primary-color); }
         
-        .footer p {
-            font-size: 14px;
-            color: #00ff00;
-            margin-bottom: 10px;
+        /* Screamer Styling */
+        #screamer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(10,0,0,0.95); /* Fond rouge sombre pour screamer */
+            z-index: 10001; 
+            display: none; 
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            backdrop-filter: blur(10px) brightness(0.5);
         }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-            
-            .glitch {
-                font-size: 32px;
-            }
-            
-            .section-title {
-                font-size: 24px;
-            }
+        #screamer-image {
+            max-width: 80%; /* Image un peu plus petite pour voir le fond */
+            max-height: 80%;
+            object-fit: contain;
+            animation: glitch-image-intense 0.3s infinite steps(3, end), pulseScreamer 1s infinite alternate;
+            border: 4px solid var(--error-color);
+            box-shadow: 0 0 50px var(--error-color), 0 0 100px var(--error-color);
+            filter: saturate(200%) contrast(150%);
+        }
+        @keyframes glitch-image-intense {
+            0% { transform: translate(0,0) skew(0); }
+            25% { transform: translate(-10px, 10px) skew(-8deg); }
+            50% { transform: translate(10px, -10px) skew(8deg); }
+            75% { transform: translate(-5px, 5px) skew(-4deg); }
+            100% { transform: translate(5px, -5px) skew(4deg); }
+        }
+        @keyframes pulseScreamer {
+            from { filter: brightness(0.8) saturate(150%); }
+            to { filter: brightness(1.2) saturate(250%); }
+        }
+
+
+        /* Image Viewer Styling */
+        .image-viewer-content img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+            border: 2px solid var(--secondary-color);
+            box-shadow: 0 0 15px var(--secondary-color);
+        }
+        .ascii-art {
+            font-family: var(--font-pixel); 
+            white-space: pre;
+            line-height: 1;
+            font-size: 0.9em; 
+            color: var(--primary-color); /* Assurer la couleur pour l'art ASCII */
+            text-shadow: var(--text-glow-primary);
+        }
+
+        /* Loading Indicator */
+        .loading-dots {
+            font-family: var(--font-display);
+        }
+        .loading-dots span {
+            animation: blink 1.4s infinite both;
+            display: inline-block;
+            color: var(--tertiary-color); /* Points de chargement violets */
+            text-shadow: 0 0 5px var(--tertiary-color);
+        }
+        .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes blink {
+            0% { opacity: .2; transform: translateY(0); }
+            20% { opacity: 1; transform: translateY(-2px); }
+            100% { opacity: .2; transform: translateY(0); }
         }
     </style>
 </head>
 <body>
-    <canvas class="matrix-bg" id="matrix"></canvas>
+    <div class="scanline-overlay"></div>
 
-    <!-- Audio elements -->
-<audio id="keySound" preload="auto">
-    <source src="https://www.soundjay.com/misc/sounds/keyboard-typing-1.wav" type="audio/wav">
-</audio>
-<audio id="hackSound" preload="auto">
-    <source src="https://www.soundjay.com/misc/sounds/computer-beep-1.wav" type="audio/wav">
-</audio>
-<audio id="errorSound" preload="auto">
-    <source src="https://www.soundjay.com/misc/sounds/fail-buzzer-1.wav" type="audio/wav">
-</audio>
-<audio id="successSound" preload="auto">
-    <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav">
-</audio>
+    <div id="boot-screen">
+        <div class="nyx-logo-boot">
+<pre>
+  _   _  ____  _   _ ____  
+ | \ | |/ __ \| \ | |  _ \ 
+ |  \| | |  | |  \| | |_) |
+ | . ` | |  | | . ` |  _ < 
+ | |\\  | |__| | |\\  | |_) |
+ |_| \_|\____/|_| \_|____/ 
+          N Y X O S         
+</pre>
+        </div>
+        <div id="boot-text"></div>
+        <div id="boot-progress-bar-container">
+            <div id="boot-progress-bar"></div>
+        </div>
+        <p style="margin-top: 20px; font-size: 0.8em;">Initializing NyxOS v0.9 "Obsidian Veil"...</p>
+    </div>
 
-<!-- Hidden elements for easter eggs -->
-<div class="secret-message" id="secretMessage"></div>
-<div class="ascii-art" id="asciiArt"></div>
-<canvas class="binary-rain" id="binaryRain"></canvas>
-    
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <a href="#" class="logo">UNDERGROUND SOCIETY</a>
-            <ul class="nav-links">
-                <li><a href="#manifest">./manifeste</a></li>
-                <li><a href="#protocols">./objectifs</a></li>
-                <li><a href="#operations">./membres</a></li>
-                <li><a href="#recruit">./recrutement</a></li>
-            </ul>
-        </nav>
-    </header>
-    
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="terminal-window">
-            <div class="terminal-header">
-                <div class="terminal-button"></div>
-                <div class="terminal-button" style="background: #ffff00;"></div>
-                <div class="terminal-button" style="background: #ff0000;"></div>
-                <div class="terminal-title">root@null_sector:~</div>
-            </div>
-            <div class="terminal-content">
-                <p class="typing-effect">Establishing secure connection...</p>
-                <p style="margin-top: 10px;">Connection established.</p>
-                <p style="margin-top: 10px;">Running on TOR exit node: LS-UNDERGROUND-437</p>
-                <p>Encryption: AES-256-GCM</p>
-                <p>Status: <span style="color: #fff;">UNDETECTED</span></p>
-                <br>
-                <p class="glitch">UNDERGROUND SOCIETY</p>
-                <p style="margin-top: 20px;">Los Santos. Ville corrompue jusqu'à la moelle.</p>
-                <p>Nous allons observer. Nous allons patienter. Nous allons infiltrer.</p>
-                <p>Le moment venun, nous révélerons la vérité.</p>
-                <br>
-                <p style="color: #fff;">"La justice n'existe pas. Nous sommes la conséquence."</p>
-                
-                <div class="command-line">
-                    <span class="prompt">root@null_sector:~$</span>
-                    <input type="text" class="command-input" placeholder="type 'help' for commands..." autofocus>
-                </div>
-            </div>
+    <div id="desktop">
+        <div id="deco-top-left" class="desktop-deco">
+            NYX_OS_KERNEL_V0.9<br>
+            STATUS: STABLE<br>
+            ENCRYPTION: AES-8192<br>
+            THREAT_LEVEL: NOMINAL
         </div>
-    </section>
-    
-    <!-- Manifest Section -->
-    <section class="section" id="manifest">
-        <h2 class="section-title">cat /manifest.txt</h2>
-        
-        <div class="code-block">
-            <code>
-[2014-2019] L'OBSERVATION<br>
-Pendant 5 ans, nous avions étudié Los Santos. Infiltré ses institutions.<br>
-Compris ses failles. Cartographié sa corruption.<br>
-<br>
-Nous avions vu:<br>
-• Les flics du LSPD vendre des armes aux criminels<br>
-• Le FBR fabriquer des preuves pour des condamnations arbitraires<br>
-• Le procureur manipuler la justice selon ses intérêts personnels<br>
-• Les médecins de l'EMS trafiquer des substances illégales<br>
-• Les gérants d'armureries alimenter les guerres de gangs pour le profit<br>
-• Les racistes du nord terroriser des innocents en toute impunité<br>
-<br>
-[2019-2024] LA DISPERSION<br>
-Un de nos membres a voulu aller trop vite. Trop loin.<br>
-L'opération a mal tourné. Le groupe s'est dispersé.<br>
-Nous nous sommes fondus dans l'ombre. Infiltrés dans le crime organisé.<br>
-Italiens. Creeps. D'autres. Collecte de fonds. Préparation.<br>
-<br>
-[2025] LA RENAISSANCE<br>
-7 membres. 7 fantômes revenus pour finir ce qu'on a commencé.<br>
-Nouveaux outils. Nouvelle approche. Patience et précision.<br>
-<br>
-Cette fois, nous ne nous précipiterons pas.<br>
-Chaque corruption sera exposée. Chaque secret révélé.<br>
-Un hack à la fois. Une vérité à la fois.<br>
-<br>
-STATUT: PHASE 1 - RECONSTRUCTION<br>
-MEMBRES ACTIFS: 7<br>
-NIVEAU DE PRÉPARATION: ████░░░░░░ 40%<br>
-            </code>
+        <div id="deco-bottom-right" class="desktop-deco">
+            :: NYXNET :: UMBRAL VEIL PROTOCOL ::<br>
+            :: SECURE_NODE_7B3D :: ACTIVE_SINCE_CYCLE_0x2A ::
         </div>
-    </section>
-    
-    <!-- Protocols Section -->
-    <section class="section" id="protocols">
-        <h2 class="section-title">ls /objectifs/</h2>
-        
-        <h3 style="color: #fff; margin-bottom: 30px;">OBJECTIFS COURT TERME (0-2 MOIS)</h3>
-        <div class="grid">
-            <div class="card">
-                <h3>Reconstruction Infrastructure</h3>
-                <p>• Acquisition de serveurs sécurisés</p>
-                <p>• Mise en place d'un réseau crypté</p>
-                <p>• Installation de backdoors dans les systèmes publics</p>
-                <p>• Création d'identités numériques de couverture</p>
-            </div>
-            
-            <div class="card">
-                <h3>Collecte de Renseignements</h3>
-                <p>• Infiltration des communications LSPD</p>
-                <p>• Surveillance des transactions du gouvernement</p>
-                <p>• Cartographie des réseaux corrompus</p>
-                <p>• Identification des cibles prioritaires</p>
-                <p>• Constitution de dossiers compromettants</p>
-            </div>
-            
-            <div class="card">
-                <h3>Recrutement & Formation</h3>
-                <p>• Identification de 5 nouveaux talents</p>
-                <p>• Formation aux protocoles de sécurité</p>
-                <p>• Tests d'infiltration supervisés</p>
-                <p>• Établissement de cellules autonomes</p>
-                <p>• Mise en place de la hiérarchie</p>
-            </div>
+         <div id="deco-status-bar">
+            <span class="status-item">UTIL. CPU: <span id="cpu-load">13.37</span>%</span>
+            <span class="status-item">TRAFIC RÉSEAU: <span id="net-traffic">42.69</span> Kbps</span>
+            <span class="status-item">SIG. ORACLE: <span id="oracle-sig" class="text-green-400">FAIBLE</span></span>
+            <span class="status-item" id="current-time">--:--:--</span>
         </div>
-        
-        <h3 style="color: #fff; margin: 40px 0 30px 0;">OBJECTIFS LONG TERME (6-12 MOIS)</h3>
-        <div class="grid">
-            <div class="card">
-                <h3>Opération Transparence</h3>
-                <p>• Exposer la corruption du gouvernement et des entreprises légales</p>
-                <p>• Révéler les malversations du procureur</p>
-                <p>• Exposer le trafic d'arme (DANG#R ELEVÉ)</p>
-                <p>• Forcer des démissions et arrestations</p>
-            </div>
-            
-            <div class="card">
-                <h3>Redistribution Numérique</h3>
-                <p>• Transferts forcés depuis comptes corrompus</p>
-                <p>• Annulation de dettes citoyennes illégitimes</p>
-                <p>• Sabotage économique des profiteurs de guerre</p>
-                <p>• Création d'un fonds pour victimes du système</p>
-                <p>• Blackout financier des institutions corrompues</p>
-            </div>
-            
-            <div class="card">
-                <h3>Contrôle Infrastructure</h3>
-                <p>• Accès aux caméras de la ville</p>
-                <p>• Contrôle des communications d'urgence</p>
-                <p>• Infiltration des bases de données des entreprises et gouvernement</p>
-                <p>• Capacité de blackout</p>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Operations Section -->
-    <section class="section" id="operations">
-        <h2 class="section-title">grep -r "membres" /underground/</h2>
-        
-        <div class="code-block">
-            <code>
-MEMBRES ACTIFS: 7<br>
-<br>
-[MEMBRE-001] "FANTÔME"<br>
-Rôle: Fondateur / Architecte réseau<br>
-Cover: Mécanicien chez ##### <br>
-Spécialité: Infrastructure, serveurs, cryptographie<br>
-Statut: Actif - Coordonne la reconstruction<br>
-<br>
-[MEMBRE-002] "SILENCE"<br>
-Rôle: Infiltration sociale<br>
-Cover: Civil<br>
-Spécialité: Ingénierie sociale, manipulation<br>
-Statut: Actif - Embedded au LSPD<br>
-<br>
-[MEMBRE-003] "GLITCH"<br>
-Rôle: Développeur outils<br>
-Cover: Civil<br>
-Spécialité: Création de malware, exploits<br>
-Statut: Actif - Reconstruction des outils perdus<br>
-<br>
-[MEMBRE-004] "ÉCHO"<br>
-Rôle: Surveillance & Renseignement<br>
-Cover: Employé au LTD<br>
-Spécialité: OSINT, analyse de données<br>
-Statut: Actif - Cartographie des réseaux corrompus<br>
-<br>
-[MEMBRE-005] "PIXEL"<br>
-Rôle: Opérations terrain<br>
-Cover: Civil<br>
-Spécialité: Installation hardware, infiltration physique<br>
-Statut: Actif - Sécurisation des planques<br>
-<br>
-[MEMBRE-006] "STATIC"<br>
-Rôle: Communications<br>
-Cover: Civil<br>
-Spécialité: Interception, brouillage radio<br>
-Statut: Actif - Écoute des fréquences gouvernementales<br>
-<br>
-[MEMBRE-007] "VOID"<br>
-Rôle: Finances & Logistique<br>
-Cover: Comptable freelance<br>
-Spécialité: Blanchiment, transferts<br>
-Statut: Actif - Gestion des ressources<br>
-<br>
-Note: Tous les membres maintiennent leurs couvertures.<br>
-Aucune activité suspecte jusqu'à la Phase 2.<br>
-            </code>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <h3 style="color: #fff; margin-bottom: 20px;">RESSOURCES ACTUELLES:</h3>
-            <div class="grid">
-                <div class="card">
-                    <h3>Infrastructure</h3>
-                    <p>• Entrepôts sécurisés: 3</p>
-                    <p>• Véhicules: 4</p>
-                    <p>• Armes à feu: 6 (défense uniquement)</p>
-                    <p>• Serveurs: 0 (en cours d'acquisition)</p>
-                    <p>• Safe houses: 2 (temporaires)</p>
-                </div>
-                
-                <div class="card">
-                    <h3>Capacités Techniques</h3>
-                    <p>• Outils de hack: En reconstruction (0%)</p>
-                    <p>• Backdoors actives: 0 (phase reconnaissance)</p>
-                    <p>• Réseau crypté: Opérationnel</p>
-                </div>
-                
-                <div class="card">
-                    <h3>Finances</h3>
-                    <p>• Budget opérationnel: $127,000</p>
-                    <p>• Revenus mensuels: Via couvertures</p>
-                    <p>• Crypto-réserve: En constitution</p>
-                    <p>• Fonds d'urgence: $45,000</p>
-                    <p>• Objectif Phase 2: $500,000</p>
-                </div>
-            </div>
-        </div>
-        
-        <div style="margin-top: 40px;">
-            <h3 style="color: #fff; margin-bottom: 20px;">OPÉRATIONS PLANIFIÉES:</h3>
-            <div class="code-block">
-                <code>
-[OP-001] "PREMIER SIGNAL"<br>
-Cible: Gouvernement<br>
-Objectif: Test d'intrusion via social engineering, identification des maillons faibles <br>
-Risque: Elevé<br>
-Statut: Planification<br>
-<br>
-[OP-002] "ÉCOUTE PASSIVE"<br>
-Cible: Communications radio LSPD<br>
-Objectif: Collecte d'informations, revente, preuve de corruption etc.. <br>
-Risque: Elevé<br>
-Statut: Planification<br>
-<br>
-[OP-003] "Blackout"<br>
-Cible: Secteur industriel<br>
-Objectif: Vérifier nos capacités de disruption<br>
-Risque: Modéré<br>
-Statut: Attente acquisition serveurs<br>
-<br>
-[OP-004] "DOSSIER NOIR"<br>
-Cible: Base de données des contraventions, transactions, comptabilité des entreprises<br>
-Objectif: Identifier les abus de pouvoir<br>
-Risque: Elevé<br>
-Statut: Reconnaissance<br>
-                </code>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Recruitment Section -->
-    <section class="section" id="recruit">
-        <h2 class="section-title">./recruit.sh --init</h2>
-        
-        <div class="terminal-window" style="margin-bottom: 40px;">
-            <div class="terminal-content">
-                <p>Initializing recruitment protocol...</p>
-                <p>Ce processus de recrutement sera rendu public une fois le groupe réunit officiellement :...</p>
-                <br>
-                <p style="color: #fff;">NOUS RECHERCHONS:</p>
-                <p>• Hackers (pentest, reverse engineering, cryptographie)</p>
-                <p>• Ingénieurs sociaux (infiltration, manipulation)</p>
-                <p>• Techniciens (hardware, réseaux, drones)</p>
-                <p>• Analystes (OSINT, pattern recognition)</p>
-                <p>• Opérateurs (terrain, exfiltration, logistics)</p>
-                <br>
-                <p style="color: #ff0000;">AVERTISSEMENT:</p>
-                <p>Rejoindre NULL_SECTOR est un engagement à vie.</p>
-                <p>Trahison = Disparition. Aucune exception.</p>
-            </div>
-        </div>
-        
-        <div class="code-block">
-            <code>
-PROCESSUS DE RECRUTEMENT:<br>
-<br>
-PHASE 1: DÉCOUVERTE<br>
-Des indices sont disséminés dans Los Santos et sur internet.<br>
-Graffitis. QR codes. Transmissions radio.<br>
-Seuls les plus observateurs les trouveront.<br>
-<br>
-PHASE 2: PREMIER CONTACT<br>
-Puzzle cryptographique à résoudre.<br>
-Temps limite: 24h. Pas de seconde chance.<br>
-<br>
-PHASE 3: ÉVALUATION<br>
-Test pratique supervisé à distance.<br>
-Hack mineur. Cible fournie. Méthode libre.<br>
-<br>
-PHASE 4: RENCONTRE<br>
-Lieu public. Heure tardive. Venez seul.<br>
-<br>
-PHASE 5: INITIATION<br>
-Première mission réelle. Baptême du feu.<br>
-Réussite = Membre. Échec = Oubli.<br>
-<br>
-POUR COMMENCER:<br>
-Cherchez le symbole NULL dans Little Seoul.<br>
-La suite viendra à ceux qui comprennent.<br>
-<br>
-"La curiosité est la première qualité d'un hacker."<br>
-            </code>
-        </div>
-    </section>
-    
-    <!-- Footer -->
-    <footer class="footer">
-        <p>UNDERGROUND SOCIETY © 2025 | Réseau Sécurisé | Contact: [CRYPTÉ]</p>
-        <p>Nous sommes partout. Nous sommes nulle part. Nous sommes la conséquence.</p>
-        <p style="margin-top: 20px; font-size: 12px; opacity: 0.5;">
-            4C 61 20 6A 75 73 74 69 63 65 20 6E 27 65 78 69 73 74 65 20 70 61 73 2E 20 4E 6F 75 73 20 73 6F 6D 6D 65 73 20 6C 61 20 63 6F 6E 73 C3 A9 71 75 65 6E 63 65 2E
-        </p>
-    </footer>
-    
+    </div>
+
+    <div id="screamer-overlay">
+        <img id="screamer-image" src="https://placehold.co/600x400/FF0033/FFFFFF?text=SYSTEM_CORRUPTION" alt="System Corruption">
+    </div>
+
     <script>
-       // Matrix rain effect
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}";
-const matrixArray = matrix.split("");
-
-const fontSize = 10;
-const columns = canvas.width / fontSize;
-
-const drops = [];
-for(let x = 0; x < columns; x++) {
-    drops[x] = 1;
-}
-
-function draw() {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#00ff00';
-    ctx.font = fontSize + 'px monospace';
-    
-    for(let i = 0; i < drops.length; i++) {
-        const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        // --- Global Variables & Tone.js Setup ---
+        let masterVolume = new Tone.Volume(-12).toDestination(); 
+        const keyClickSound = () => {
+            new Tone.Synth({
+                oscillator: { type: 'triangle' }, // Son plus doux
+                volume: -22, // Encore plus discret
+                envelope: { attack: 0.001, decay: 0.03, sustain: 0, release: 0.05 }
+            }).connect(masterVolume).triggerAttackRelease('E2', '128n', Tone.now()); // Note plus haute, durée très courte
+        };
+        const errorSound = () => new Tone.Synth({ oscillator: {type: 'sawtooth', partials: [1, 0.5, 0.2] }, volume: -10, envelope: {attack:0.01, decay:0.3, sustain:0, release:0.2}}).connect(masterVolume).triggerAttackRelease('F#1', '8n');
+        const successSound = () => new Tone.Synth({ oscillator: {type: 'sine'}, volume: -15, envelope: {attack:0.01, decay:0.1, sustain:0.1, release:0.2}}).connect(masterVolume).triggerAttackRelease('A4', '16n', Tone.now(), 0.7);
+        const loginSound = () => new Tone.FMSynth({harmonicity:1.5, modulationIndex:8, detune:0, oscillator:{type:"sine"}, envelope:{attack:0.02,decay:0.2,sustain:0.3,release:0.6}, modulation:{type:"triangle"}, modulationEnvelope:{attack:0.02,decay:0.3,sustain:0.2,release:0.6}}).connect(masterVolume).triggerAttackRelease("D4", "2n");
+        const screamerSound = () => new Tone.NoiseSynth({noise:{type:'white', playbackRate: 0.5}, volume: -5, envelope:{attack:0.005,decay:1.0,sustain:0,release:0.8}}).connect(masterVolume).triggerAttackRelease("1n");
         
-        if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-            drops[i] = 0;
+        let backgroundMusic;
+        function startBackgroundMusic() {
+            if (backgroundMusic && backgroundMusic.state === "started") return;
+            const reverb = new Tone.Reverb(2.5).connect(masterVolume); // Ajout d'une réverbération
+            const delay = new Tone.FeedbackDelay("8n", 0.3).connect(reverb); // Ajout d'un délai
+
+            backgroundMusic = new Tone.Loop(time => {
+                const notes = ["A1", "C2", "E2", "G#1"];
+                const randomNote = notes[Math.floor(Math.random() * notes.length)];
+                new Tone.AMSynth({
+                    harmonicity: 1.5,
+                    detune: 0,
+                    oscillator: { type: "sawtooth" },
+                    envelope: { attack: 1, decay: 0.5, sustain: 0.8, release: 2 },
+                    modulation: { type: "sine" },
+                    modulationEnvelope: { attack: 0.8, decay: 0.2, sustain: 0.5, release: 1 }
+                }).connect(delay).triggerAttackRelease(randomNote, "1m", time, 0.3); // Volume plus bas pour l'ambiance
+            }, "3m").start(0); 
+            Tone.Transport.start();
+            console.log("Background music started with effects.");
         }
-        drops[i]++;
-    }
-}
 
-setInterval(draw, 35);
 
-// Sound system
-const sounds = {
-    key: new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiDYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizEIHWq+8+OWT' +
-              'AkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RlGQU7k9n1unEiBC13yO/eizEIHWq+8+OWTAkMUqzn67RjFAU4jdDsvHYnBCh+zPLchjMJFmO78OaeTQ0NU6jj7b1kGAU9' +
-              'lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzn77BdGAU+lNr2umkeBCp6ye/bhjAIG2i98eSXUA0PVqzl67VfGAU/ldr3u3AkBjJ+zPDXfS0IG2m98OaXTwwNVazn7bNeFwU3jdLqu34uBS+A0fXffSsHG2m58OKZTwwLUqfk7bllFgU3jdLqu34uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTwwLUqfk7blmGQU7j8/rvH4uBS+A0fXffSsHG2m58OKZTw=='),
-    hack: new Audio('data:audio/wav;base64,UklGRoYEAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YWIEAAD/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////'),
-    error: new Audio('data:audio/wav;base64,UklGRvQCAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YdACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='),
-    success: new Audio('data:audio/wav;base64,UklGRl4FAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YToFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=')
-};
-
-// Mute sounds by default (add volume control)
-Object.values(sounds).forEach(sound => sound.volume = 0.3);
-
-// Terminal state
-let terminalHistory = [];
-let historyIndex = -1;
-let currentDirectory = '/home/underground';
-let hackerLevel = 0;
-let secretsFound = [];
-
-// Enhanced terminal with easter eggs
-const commandInput = document.querySelector('.command-input');
-const terminalContent = document.querySelector('.terminal-content');
-
-// Key sound on typing
-commandInput.addEventListener('keydown', function(e) {
-    if(e.key !== 'Enter') {
-        sounds.key.currentTime = 0;
-        sounds.key.play().catch(() => {});
-    }
-});
-
-// Command processing
-commandInput.addEventListener('keypress', function(e) {
-    if(e.key === 'Enter') {
-        const command = this.value.toLowerCase().trim();
-        terminalHistory.push(command);
-        historyIndex = terminalHistory.length;
-        
-        processCommand(command);
-        this.value = '';
-    }
-});
-
-// History navigation
-commandInput.addEventListener('keydown', function(e) {
-    if(e.key === 'ArrowUp' && historyIndex > 0) {
-        historyIndex--;
-        this.value = terminalHistory[historyIndex];
-    } else if(e.key === 'ArrowDown' && historyIndex < terminalHistory.length - 1) {
-        historyIndex++;
-        this.value = terminalHistory[historyIndex];
-    }
-});
-
-function processCommand(command) {
-    const args = command.split(' ');
-    const cmd = args[0];
-    
-    switch(cmd) {
-        case 'help':
-            showHelp();
-            break;
-            
-        case 'ls':
-            listDirectory();
-            break;
-            
-        case 'cd':
-            changeDirectory(args[1]);
-            break;
-            
-        case 'cat':
-            readFile(args[1]);
-            break;
-            
-        case 'hack':
-            initHackMode();
-            break;
-            
-        case 'matrix':
-            matrixMode();
-            break;
-            
-        case 'whoami':
-            showIdentity();
-            break;
-            
-        case 'ping':
-            pingServer(args[1]);
-            break;
-            
-        case 'ssh':
-            sshConnect(args[1]);
-            break;
-            
-        case 'decrypt':
-            decrypt(args[1]);
-            break;
-            
-        case 'hurricane':
-            hurricaneVirus();
-            break;
-            
-        case 'clear':
-            location.reload();
-            break;
-            
-        case '42':
-            theAnswer();
-            break;
-            
-        case 'sudo':
-            sudoCommand(args.slice(1).join(' '));
-            break;
-            
-        case 'nmap':
-            networkScan();
-            break;
-            
-        case 'follow':
-            if(args[1] === 'the' && args[2] === 'white' && args[3] === 'rabbit') {
-                whiteRabbit();
-            } else {
-                unknownCommand(command);
+        // --- Window Manager ---
+        class WindowManager {
+            constructor(desktopId) {
+                this.desktop = document.getElementById(desktopId);
+                this.windows = [];
+                this.zIndexCounter = 100;
+                this.activeWindow = null;
             }
-            break;
-            
-        default:
-            unknownCommand(command);
-    }
-}
 
-function showHelp() {
-    const helpText = `
-COMMANDES DISPONIBLES:
-  help              - Affiche cette aide
-  ls                - Liste les fichiers
-  cd [dir]          - Change de répertoire
-  cat [file]        - Lit un fichier
-  whoami            - Qui suis-je?
-  ping [host]       - Ping un serveur
-  ssh [host]        - Connection SSH
-  decrypt [code]    - Décrypte un message
-  hack              - Active le mode hack
-  matrix            - Change la matrice
-  clear             - Nettoie le terminal
-  nmap              - Scan du réseau
-  
-COMMANDES SECRÈTES:
-  ????              - À vous de découvrir...`;
-  
-    addToTerminal(helpText);
-    sounds.success.play();
-}
+            createWindow(id, title, contentGenerator, options = {}) {
+                const win = document.createElement('div');
+                win.id = `window-${id}`;
+                win.className = 'window';
+                win.style.width = options.width || '600px';
+                win.style.height = options.height || '400px';
+                
+                // Positionnement initial aléatoire mais intelligent
+                const desktopWidth = this.desktop.offsetWidth;
+                const desktopHeight = this.desktop.offsetHeight;
+                const winWidth = parseInt(win.style.width, 10);
+                const winHeight = parseInt(win.style.height, 10);
 
-function listDirectory() {
-    let files = '';
-    
-    switch(currentDirectory) {
-        case '/home/underground':
-            files = `
-drwxr-xr-x  2 root root  4096 Jan 15 03:14 .
-drwxr-xr-x  3 root root  4096 Jan 15 03:14 ..
--rw-r--r--  1 root root   220 Jan 15 03:14 .bash_logout
--rw-r--r--  1 root root  3526 Jan 15 03:14 .bashrc
--rw-r--r--  1 root root   807 Jan 15 03:14 .profile
-drwx------  2 root root  4096 Jan 15 03:14 .ssh/
--rw-------  1 root root  1337 Jan 15 03:14 secret.txt
--rwx------  1 root root  2048 Jan 15 03:14 enigma.sh
-drwxr-xr-x  2 root root  4096 Jan 15 03:14 tools/`;
-            break;
-            
-        case '/home/underground/tools':
-            files = `
--rwxr-xr-x  1 root root  4096 Jan 15 03:14 exploit.py
--rwxr-xr-x  1 root root  2048 Jan 15 03:14 scanner.sh
--rwxr-xr-x  1 root root  8192 Jan 15 03:14 cryptor.exe
--rw-r--r--  1 root root   512 Jan 15 03:14 passwords.db`;
-            break;
-            
-        case '/home/underground/.ssh':
-            files = `
--rw-------  1 root root  1679 Jan 15 03:14 id_rsa
--rw-r--r--  1 root root   398 Jan 15 03:14 id_rsa.pub
--rw-r--r--  1 root root   444 Jan 15 03:14 known_hosts`;
-            break;
-            
-        default:
-            files = 'Accès refusé.';
-    }
-    
-    addToTerminal(files);
-    sounds.key.play();
-}
+                win.style.left = options.left || `${Math.max(20, Math.min(Math.random() * (desktopWidth - winWidth - 40), desktopWidth - winWidth - 20))}px`;
+                win.style.top = options.top || `${Math.max(20, Math.min(Math.random() * (desktopHeight - winHeight - 80), desktopHeight - winHeight - 40))}px`; // Moins 80 pour la barre de statut
+                
+                win.style.zIndex = this.zIndexCounter++;
 
-function changeDirectory(dir) {
-    if(!dir || dir === '~') {
-        currentDirectory = '/home/underground';
-        addToTerminal('Retour au répertoire home.');
-    } else if(dir === '..') {
-        if(currentDirectory !== '/home/underground') {
-            currentDirectory = '/home/underground';
-            addToTerminal('Répertoire parent.');
-        }
-    } else if(dir === 'tools' && currentDirectory === '/home/underground') {
-        currentDirectory = '/home/underground/tools';
-        addToTerminal('Entré dans tools/');
-        sounds.success.play();
-    } else if(dir === '.ssh' && currentDirectory === '/home/underground') {
-        currentDirectory = '/home/underground/.ssh';
-        addToTerminal('Entré dans .ssh/');
-        showSecretMessage('SSH keys trouvées... intéressant.');
-    } else {
-        addToTerminal(`bash: cd: ${dir}: Aucun fichier ou dossier de ce type`);
-        sounds.error.play();
-    }
-}
+                const header = document.createElement('div');
+                header.className = 'window-header';
+                header.innerHTML = `<span class="window-title">${title}</span>
+                                    <div class="window-buttons">
+                                        <span class="minimize-btn" title="Minimiser"></span>
+                                        <span class="maximize-btn" title="Agrandir (Non implémenté)"></span>
+                                        <span class="close-btn" title="Fermer"></span>
+                                    </div>`;
+                
+                const content = document.createElement('div');
+                content.className = 'window-content';
+                
+                win.appendChild(header);
+                win.appendChild(content); 
 
-function readFile(filename) {
-    if(!filename) {
-        addToTerminal('Usage: cat [filename]');
-        return;
-    }
-    
-    switch(filename) {
-        case 'secret.txt':
-            addToTerminal(`
-01001100 01100001 00100000 01110110 01100101 01110010 01101001 01110100 
-01100101 00100000 01100101 01110011 01110100 00100000 01100011 01100001
-01100011 01101000 01100101 01100101 00100000 01100100 01100001 01101110 
-01110011 00100000 01101100 01100101 00100000 01100011 01101111 01100100
-01100101
+                if (typeof contentGenerator === 'string') {
+                    content.innerHTML = contentGenerator;
+                } else {
+                    contentGenerator(content, win); 
+                }
 
-Indice: Essayez 'decrypt binary'`);
-            secretsFound.push('binary_message');
-            hackerLevel++;
-            break;
-            
-        case 'enigma.sh':
-            addToTerminal(`
-#!/bin/bash
-# L'énigme des trois portes
+                this.desktop.appendChild(win);
+                this.windows.push(win);
+                this.setActive(win);
 
-echo "Trois serveurs. Trois mots de passe. Un seul accès."
-echo "ALPHA: Le premier est l'année où tout a commencé"
-echo "BETA: Le second est le nombre de membres originaux"  
-echo "GAMMA: Le dernier est notre nom de code initial"
-echo ""
-echo "ssh [serveur]:[password]"
-`);
-            secretsFound.push('enigma');
-            break;
-            
-        case 'passwords.db':
-            if(currentDirectory === '/home/underground/tools') {
-                addToTerminal('[ENCRYPTED DATABASE]\nUtilisez "decrypt passwords" avec la clé maître');
-            } else {
-                addToTerminal('Fichier non trouvé');
+                this.makeDraggable(win, header);
+                header.querySelector('.close-btn').addEventListener('click', () => this.closeWindow(win));
+                win.addEventListener('mousedown', () => this.setActive(win));
+                
+                return win;
             }
-            break;
-            
-        default:
-            addToTerminal(`cat: ${filename}: Aucun fichier ou dossier de ce type`);
-            sounds.error.play();
-    }
-}
 
-function initHackMode() {
-    document.body.classList.add('hack-mode');
-    sounds.hack.play();
-    
-    addToTerminal(`
-HACK MODE ACTIVÉ
-===============
-Scanning des vulnérabilités...
-[████████████████████████] 100%
-
-3 failles trouvées:
-1. Port 22 (SSH) - Authentification faible
-2. Port 80 (HTTP) - Injection SQL possible  
-3. Port 3306 (MySQL) - Mot de passe par défaut
-
-Tapez 'exploit [numéro]' pour exploiter une faille`);
-    
-    setTimeout(() => {
-        document.body.classList.remove('hack-mode');
-    }, 5000);
-}
-
-function matrixMode() {
-    const matrixCanvas = document.getElementById('matrix');
-    ctx.fillStyle = '#ff0000';
-    
-    addToTerminal('Mode Matrix: ROUGE activé');
-    showSecretMessage('La matrice a changé... voyez-vous différemment?');
-    
-    setTimeout(() => {
-        ctx.fillStyle = '#00ff00';
-        addToTerminal('Mode Matrix: retour à la normale');
-    }, 10000);
-}
-
-function showIdentity() {
-    const identities = [
-        'root@underground_society',
-        'Un fantôme dans la machine',
-        'Celui qui cherche la vérité',
-        'L\'architecte du chaos',
-        '0x4e554c4c'
-    ];
-    
-    const identity = identities[Math.min(hackerLevel, identities.length - 1)];
-    addToTerminal(identity);
-    
-    if(hackerLevel >= 3) {
-        showSecretMessage(`Niveau de hacker: ${hackerLevel}. Continuez à explorer...`);
-    }
-}
-
-function pingServer(host) {
-    if(!host) {
-        addToTerminal('Usage: ping [host]');
-        return;
-    }
-    
-    const servers = {
-        'lspd.gov': 'PING lspd.gov (192.168.1.1): 56 bytes\nHost seems down (filtered)',
-        'underground.onion': 'PING underground.onion (10.0.0.1): 56 bytes\n64 bytes from 10.0.0.1: time=0.42 ms',
-        'alpha': 'PING alpha (172.16.0.10): Connection établie. Utilisez SSH pour vous connecter.',
-        'beta': 'PING beta (172.16.0.20): Connection établie. Utilisez SSH pour vous connecter.',
-        'gamma': 'PING gamma (172.16.0.30): Connection établie. Utilisez SSH pour vous connecter.'
-    };
-    
-    const response = servers[host] || `ping: cannot resolve ${host}: Unknown host`;
-    addToTerminal(response);
-}
-
-function sshConnect(target) {
-    if(!target) {
-        addToTerminal('Usage: ssh [user@]host[:password]');
-        return;
-    }
-    
-    const [server, password] = target.split(':');
-    
-    // Easter egg: Les trois serveurs de l'énigme
-    if(server === 'alpha' && password === '2014') {
-        addToTerminal('Connection à ALPHA réussie...');
-        setTimeout(() => {
-            showASCIIArt('alpha');
-            secretsFound.push('alpha_server');
-            hackerLevel += 2;
-        }, 1000);
-    } else if(server === 'beta' && password === '5') {
-        addToTerminal('Connection à BETA réussie...');
-        setTimeout(() => {
-            showASCIIArt('beta');
-            secretsFound.push('beta_server');
-            hackerLevel += 2;
-        }, 1000);
-    } else if(server === 'gamma' && password === 'null_sector') {
-        addToTerminal('Connection à GAMMA réussie...');
-        setTimeout(() => {
-            showASCIIArt('gamma');
-            if(secretsFound.includes('alpha_server') && secretsFound.includes('beta_server')) {
-                unlockMasterSecret();
+            setActive(win) {
+                if (this.activeWindow && this.activeWindow !== win) {
+                    this.activeWindow.classList.remove('active-window');
+                }
+                this.activeWindow = win;
+                win.classList.add('active-window');
+                win.style.zIndex = this.zIndexCounter++;
             }
-        }, 1000);
-    } else {
-        addToTerminal('Permission denied (publickey,password).');
-        sounds.error.play();
-    }
-}
 
-function decrypt(code) {
-    if(!code) {
-        addToTerminal('Usage: decrypt [code/type]');
-        return;
-    }
-    
-    if(code === 'binary' && secretsFound.includes('binary_message')) {
-        addToTerminal('Décryptage...\n"La verite est cachee dans le code"\n\nBravo! +10 points de hacker');
-        hackerLevel += 10;
-        showSecretMessage('Premier secret découvert!');
-    } else if(code === 'passwords' && hackerLevel >= 15) {
-        addToTerminal(`
-Base de données décryptée:
-========================
-FBR_admin:c0rrupt10n
-LSPD_chief:d1rty_c0p
-EMS_director:m3d1c4l_fr4ud
-Prosecutor:1ll3g4l_0ps
-        
-Ces informations sont explosives...`);
-        secretsFound.push('passwords_decrypted');
-        createGlitchWindow('ALERTE: Intrusion détectée! Traçage en cours...');
-    } else {
-        addToTerminal('Clé de décryptage invalide ou niveau insuffisant');
-        sounds.error.play();
-    }
-}
-
-function whiteRabbit() {
-    addToTerminal('Suivez le lapin blanc...');
-    document.body.style.transition = 'transform 2s';
-    document.body.style.transform = 'rotateY(360deg)';
-    
-    setTimeout(() => {
-        showASCIIArt('rabbit');
-        showSecretMessage('Bienvenue dans le terrier du lapin...');
-        hackerLevel += 5;
-        
-        // Débloquer un terminal secret
-        createSecretTerminal();
-    }, 2000);
-}
-
-function theAnswer() {
-    addToTerminal(`
-La réponse à la grande question sur la vie, l'univers et le reste...
-
-42
-
-Mais quelle était la question?`);
-    
-    if(hackerLevel >= 20) {
-        setTimeout(() => {
-            addToTerminal('\nLa question: Combien de lignes de code pour hacker Los Santos?');
-            showSecretMessage('Deep Thought approuve votre sagesse.');
-        }, 3000);
-    }
-}
-
-function sudoCommand(cmd) {
-    if(cmd === 'rm -rf /' || cmd === 'rm -rf / --no-preserve-root') {
-        addToTerminal('[sudo] Mot de passe pour underground:');
-        setTimeout(() => {
-            document.body.style.transition = 'opacity 2s';
-            document.body.style.opacity = '0';
-            setTimeout(() => {
-                document.body.innerHTML = '<h1 style="color: #00ff00; text-align: center; margin-top: 50vh;">System deleted. Goodbye.</h1>';
-            }, 2000);
-        }, 1000);
-    } else {
-        addToTerminal('underground n\'est pas dans le fichier sudoers. Cet incident sera signalé.');
-        sounds.error.play();
-    }
-}
-
-// Suite du code à partir de networkScan()
-function networkScan() {
-    addToTerminal('Lancement de nmap...');
-    const scanResult = `
-Starting Nmap 7.92
-Nmap scan report for local network
-
-Host: 192.168.1.1 (LSPD-MAINFRAME)
-PORT     STATE  SERVICE
-22/tcp   open   ssh
-80/tcp   open   http
-443/tcp  open   https
-3306/tcp open   mysql
-
-Host: 192.168.1.50 (FBR-SERVER-01)  
-PORT     STATE  SERVICE
-445/tcp  open   microsoft-ds
-3389/tcp open   ms-wbt-server
-
-Host: 192.168.1.100 (UNDERGROUND-NODE-1)
-PORT     STATE  SERVICE
-1337/tcp open   [unknown]
-8080/tcp open   http-proxy
-9999/tcp open   [classified]
-
-Host: 10.0.0.42 (GHOST-SERVER)
-PORT     STATE  SERVICE
-666/tcp  open   doom
-1984/tcp open   bigbrother
-2600/tcp open   hackers-delight
-
-Nmap done: 4 IP addresses scanned`;
-    
-    setTimeout(() => {
-        addToTerminal(scanResult);
-        if(!secretsFound.includes('ghost_server')) {
-            showSecretMessage('Un serveur fantôme détecté sur 10.0.0.42...');
-            secretsFound.push('ghost_server');
-        }
-    }, 2000);
-}
-
-function hurricaneVirus() {
-    sounds.error.play();
-    document.body.innerHTML += '<div class="virus-text">SYSTÈME COMPROMIS</div>';
-    document.querySelector('.virus-text').style.display = 'block';
-    
-    setTimeout(() => {
-        document.querySelectorAll('*').forEach(el => {
-            el.classList.add('virus-active');
-        });
-        
-        // Binary rain effect
-        initBinaryRain();
-        
-        setTimeout(() => {
-            document.body.classList.add('corrupted');
-            document.body.innerHTML = `
-                <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column;">
-                    <h1 style="color: #ff0000; font-size: 48px; text-shadow: 0 0 20px #ff0000;">HURRICANE DETECTED</h1>
-                    <p style="color: #ff0000; font-size: 24px; margin-top: 20px;">SYSTÈME DÉTRUIT</p>
-                    <p style="color: #00ff00; font-size: 16px; margin-top: 40px;">root@underground:~$ rm -rf / --no-preserve-root</p>
-                    <p style="color: #00ff00; font-size: 16px; margin-top: 10px;">Suppression en cours...</p>
-                    <p style="color: #fff; font-size: 12px; margin-top: 30px; opacity: 0.5;">Appuyez sur F5 pour reboot</p>
-                </div>
-            `;
-        }, 2000);
-    }, 1000);
-}
-
-function unknownCommand(cmd) {
-    // Easter egg caché pour les commandes spécifiques
-    const hiddenCommands = {
-        'ghost': () => {
-            addToTerminal('Connexion au serveur fantôme...');
-            setTimeout(() => {
-                showASCIIArt('ghost');
-                hackerLevel += 3;
-            }, 1000);
-        },
-        'glitch': () => {
-            document.body.style.animation = 'glitch 0.3s infinite';
-            setTimeout(() => {
-                document.body.style.animation = '';
-            }, 3000);
-            addToTerminal('Reality.exe has stopped working');
-        },
-        'backdoor': () => {
-            if(hackerLevel >= 25) {
-                addToTerminal('Backdoor activée. Accès root obtenu.');
-                showSecretMessage('Félicitations! Vous avez trouvé la backdoor secrète!');
-                unlockAdminPanel();
-            } else {
-                addToTerminal('Accès refusé. Niveau de hacker insuffisant.');
-            }
-        },
-        'konami': () => {
-            addToTerminal('↑ ↑ ↓ ↓ ← → ← → B A');
-            showSecretMessage('Code Konami reconnu!');
-        }
-    };
-    
-    if(hiddenCommands[cmd]) {
-        hiddenCommands[cmd]();
-    } else {
-        addToTerminal(`bash: ${cmd}: commande introuvable`);
-        sounds.error.play();
-    }
-}
-
-// Fonctions helper
-function addToTerminal(text) {
-    const newLine = document.createElement('div');
-    newLine.style.marginTop = '10px';
-    newLine.innerHTML = text.replace(/\n/g, '<br>');
-    terminalContent.appendChild(newLine);
-    terminalContent.scrollTop = terminalContent.scrollHeight;
-}
-
-function showSecretMessage(message) {
-    const secretMsg = document.getElementById('secretMessage');
-    secretMsg.textContent = message;
-    secretMsg.classList.add('show');
-    sounds.success.play();
-    
-    setTimeout(() => {
-        secretMsg.classList.remove('show');
-    }, 5000);
-}
-
-function showASCIIArt(type) {
-    const asciiArt = document.getElementById('asciiArt');
-    const arts = {
-        'alpha': `
-    ▄▄▄       ██▓     ██▓███   ██░ ██  ▄▄▄      
-   ▒████▄    ▓██▒    ▓██░  ██▒▓██░ ██▒▒████▄    
-   ▒██  ▀█▄  ▒██░    ▓██░ ██▓▒▒██▀▀██░▒██  ▀█▄  
-   ░██▄▄▄▄██ ▒██░    ▒██▄█▓▒ ▒░▓█ ░██ ░██▄▄▄▄██ 
-    ▓█   ▓██▒░██████▒▒██▒ ░  ░░▓█▒░██▓ ▓█   ▓██▒
-    ▒▒   ▓▒█░░ ▒░▓  ░▒▓▒░ ░  ░ ▒ ░░▒░▒ ▒▒   ▓▒█░
-     ▒   ▒▒ ░░ ░ ▒  ░░▒ ░      ▒ ░▒░ ░  ▒   ▒▒ ░
-     ░   ▒     ░ ░   ░░        ░  ░░ ░  ░   ▒   
-         ░  ░    ░  ░          ░  ░  ░      ░  ░
-                                                 
-    SERVEUR ALPHA - ACCÈS AUTORISÉ`,
-        
-        'beta': `
-    ▄▄▄▄   ▓█████▄▄▄█████▓ ▄▄▄      
-   ▓█████▄ ▓█   ▀▓  ██▒ ▓▒▒████▄    
-   ▒██▒ ▄██▒███  ▒ ▓██░ ▒░▒██  ▀█▄  
-   ▒██░█▀  ▒▓█  ▄░ ▓██▓ ░ ░██▄▄▄▄██ 
-   ░▓█  ▀█▓░▒████▒ ▒██▒ ░  ▓█   ▓██▒
-   ░▒▓███▀▒░░ ▒░ ░ ▒ ░░    ▒▒   ▓▒█░
-   ▒░▒   ░  ░ ░  ░   ░      ▒   ▒▒ ░
-    ░    ░    ░    ░        ░   ▒   
-    ░         ░  ░              ░  ░
-         ░                          
-    SERVEUR BETA - CONNEXION ÉTABLIE`,
-        
-        'gamma': `
-     ▄████  ▄▄▄       ███▄ ▄███▓ ███▄ ▄███▓ ▄▄▄      
-    ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓██▒▀█▀ ██▒▒████▄    
-   ▒██░▄▄▄░▒██  ▀█▄  ▓██    ▓██░▓██    ▓██░▒██  ▀█▄  
-   ░▓█  ██▓░██▄▄▄▄██ ▒██    ▒██ ▒██    ▒██ ░██▄▄▄▄██ 
-   ░▒▓███▀▒ ▓█   ▓██▒▒██▒   ░██▒▒██▒   ░██▒ ▓█   ▓██▒
-    ░▒   ▒  ▒▒   ▓▒█░░ ▒░   ░  ░░ ▒░   ░  ░ ▒▒   ▓▒█░
-     ░   ░   ▒   ▒▒ ░░  ░      ░░  ░      ░  ▒   ▒▒ ░
-   ░ ░   ░   ░   ▒   ░      ░   ░      ░     ░   ▒   
-         ░       ░  ░       ░          ░         ░  ░
-                                                      
-    SERVEUR GAMMA - NOYAU PRINCIPAL DÉVERROUILLÉ`,
-        
-        'rabbit': `
-            (\\_/)
-           ( o.o )
-            > ^ <
-           /|   |\\
-          (_)   (_)
-          
-    Follow the White Rabbit...`,
-        
-        'ghost': `
-         .-.
-        (o o)
-        | O \\
-         \\   \\
-          
-          
-    GHOST IN THE MACHINE`,
-        
-        'skull': `
-         ___________
-        /           \\
-       /  _       _  \\
-      |  (_)     (_)  |
-      |       _       |
-      |     \\___/     |
-       \\             /
-        \\___________/
-        
-    DANGER: ZONE INTERDITE`
-    };
-    
-    if(arts[type]) {
-        asciiArt.textContent = arts[type];
-        asciiArt.style.display = 'block';
-        
-        setTimeout(() => {
-            asciiArt.style.display = 'none';
-        }, 5000);
-    }
-}
-
-function createGlitchWindow(message) {
-    const glitchWindow = document.createElement('div');
-    glitchWindow.className = 'glitch-window';
-    glitchWindow.style.display = 'block';
-    glitchWindow.style.left = Math.random() * (window.innerWidth - 400) + 'px';
-    glitchWindow.style.top = Math.random() * (window.innerHeight - 300) + 'px';
-    
-    glitchWindow.innerHTML = `
-        <div class="glitch-window-header">ALERTE SYSTÈME</div>
-        <div style="padding: 20px; color: #ff0000;">
-            ${message}
-            <div style="margin-top: 20px;">
-                <div style="background: #ff0000; height: 20px; animation: pulse 0.5s infinite;"></div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(glitchWindow);
-    sounds.error.play();
-    
-    // Draggable window
-    let isDragging = false;
-    let currentX;
-    let currentY;
-    let initialX;
-    let initialY;
-    
-    const header = glitchWindow.querySelector('.glitch-window-header');
-    
-    header.addEventListener('mousedown', (e) => {
-        initialX = e.clientX - glitchWindow.offsetLeft;
-        initialY = e.clientY - glitchWindow.offsetTop;
-        isDragging = true;
-    });
-    
-    document.addEventListener('mousemove', (e) => {
-        if(isDragging) {
-            e.preventDefault();
-            currentX = e.clientX - initialX;
-            currentY = e.clientY - initialY;
-            glitchWindow.style.left = currentX + 'px';
-            glitchWindow.style.top = currentY + 'px';
-        }
-    });
-    
-    document.addEventListener('mouseup', () => {
-        isDragging = false;
-    });
-    
-    // Auto close after 10 seconds
-    setTimeout(() => {
-        glitchWindow.remove();
-    }, 10000);
-}
-
-function initBinaryRain() {
-    const binaryCanvas = document.getElementById('binaryRain');
-    const binaryCtx = binaryCanvas.getContext('2d');
-    
-    binaryCanvas.style.display = 'block';
-    binaryCanvas.width = window.innerWidth;
-    binaryCanvas.height = window.innerHeight;
-    
-    const binary = "01";
-    const binaryArray = binary.split("");
-    
-    const fontSize = 14;
-    const columns = binaryCanvas.width / fontSize;
-    
-    const drops = [];
-    for(let x = 0; x < columns; x++) {
-        drops[x] = 1;
-    }
-    
-    function drawBinary() {
-        binaryCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-        binaryCtx.fillRect(0, 0, binaryCanvas.width, binaryCanvas.height);
-        
-        binaryCtx.fillStyle = '#ff0000';
-        binaryCtx.font = fontSize + 'px monospace';
-        
-        for(let i = 0; i < drops.length; i++) {
-            const text = binaryArray[Math.floor(Math.random() * binaryArray.length)];
-            binaryCtx.fillText(text, i * fontSize, drops[i] * fontSize);
-            
-            if(drops[i] * fontSize > binaryCanvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
-            }
-            drops[i]++;
-        }
-    }
-    
-    setInterval(drawBinary, 50);
-}
-
-function unlockMasterSecret() {
-    addToTerminal(`
-╔═══════════════════════════════════════╗
-║     ACCÈS MAÎTRE DÉVERROUILLÉ        ║
-║                                       ║
-║  Félicitations, vous avez résolu      ║
-║  l'énigme des trois serveurs!         ║
-║                                       ║
-║  Récompense: Accès au Noyau Central  ║
-║  Commande débloquée: 'access core'    ║
-╚═══════════════════════════════════════╝`);
-    
-    secretsFound.push('master_access');
-    hackerLevel += 20;
-    
-    // Débloquer une nouvelle commande
-    processCommand.accessCore = function() {
-        showCoreInterface();
-    };
-}
-
-function createSecretTerminal() {
-    const secretTerminal = document.createElement('div');
-    secretTerminal.style.cssText = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        width: 400px;
-        height: 300px;
-        background: rgba(0, 0, 0, 0.9);
-        border: 1px solid #ff00ff;
-        padding: 10px;
-        font-family: monospace;
-        color: #ff00ff;
-        z-index: 10000;
-        overflow-y: auto;
-    `;
-    
-    secretTerminal.innerHTML = `
-        <div style="border-bottom: 1px solid #ff00ff; padding-bottom: 5px; margin-bottom: 10px;">
-            TERMINAL SECRET - WONDERLAND
-        </div>
-        <div>
-            Bienvenue de l'autre côté du miroir.<br><br>
-            Ici, les règles sont différentes.<br>
-            Les commandes normales ne fonctionnent pas.<br><br>
-            Essayez: 'dream', 'wake', 'pill red', 'pill blue'
-        </div>
-        <input type="text" style="background: none; border: none; color: #ff00ff; width: 100%; outline: none; margin-top: 10px;" placeholder="wonderland:~$" />
-    `;
-    
-    document.body.appendChild(secretTerminal);
-    
-    const secretInput = secretTerminal.querySelector('input');
-    secretInput.addEventListener('keypress', function(e) {
-        if(e.key === 'Enter') {
-            const cmd = this.value.toLowerCase();
-            
-            if(cmd === 'dream') {
-                this.value = '';
-                secretTerminal.innerHTML += '<div>Vous êtes déjà en train de rêver...</div>';
-            } else if(cmd === 'wake') {
-                secretTerminal.remove();
-                document.body.style.filter = 'invert(1)';
+            closeWindow(win) {
+                win.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                win.style.opacity = '0';
+                win.style.transform = 'scale(0.8)';
                 setTimeout(() => {
-                    document.body.style.filter = '';
-                }, 1000);
-            } else if(cmd === 'pill red') {
-                this.value = '';
-                secretTerminal.innerHTML += '<div>La vérité vous sera révélée... Niveau Master débloqué!</div>';
-                hackerLevel = 50;
-                showSecretMessage('Vous avez atteint le niveau MASTER HACKER!');
-            } else if(cmd === 'pill blue') {
-                this.value = '';
-                secretTerminal.innerHTML += '<div>Retour à l\'ignorance...</div>';
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
+                    win.remove();
+                    this.windows = this.windows.filter(w => w !== win);
+                    if (this.activeWindow === win) this.activeWindow = null;
+                }, 300);
+            }
+
+            makeDraggable(element, handle) {
+                let offsetX, offsetY, isDragging = false;
+                handle.addEventListener('mousedown', (e) => {
+                    if (e.target.closest('.window-buttons')) return; // Ne pas glisser si on clique sur les boutons
+                    isDragging = true;
+                    offsetX = e.clientX - element.offsetLeft;
+                    offsetY = e.clientY - element.offsetTop;
+                    this.setActive(element);
+                    document.body.style.cursor = 'move';
+                    e.preventDefault(); 
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    let newX = e.clientX - offsetX;
+                    let newY = e.clientY - offsetY;
+                    
+                    const desktopRect = this.desktop.getBoundingClientRect();
+                    newX = Math.max(0, Math.min(newX, desktopRect.width - element.offsetWidth));
+                    newY = Math.max(0, Math.min(newY, desktopRect.height - element.offsetHeight));
+
+                    element.style.left = `${newX}px`;
+                    element.style.top = `${newY}px`;
+                });
+                document.addEventListener('mouseup', () => {
+                    if(isDragging) {
+                        isDragging = false;
+                        document.body.style.cursor = 'default';
+                    }
+                });
+            }
+            
+            getWindowContent(id) {
+                const win = document.getElementById(`window-${id}`);
+                return win ? win.querySelector('.window-content') : null;
             }
         }
-    });
-}
+        let windowManager;
 
-function unlockAdminPanel() {
-    const adminPanel = document.createElement('div');
-    adminPanel.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 600px;
-        background: rgba(0, 0, 0, 0.95);
-        border: 2px solid #00ff00;
-        padding: 30px;
-        z-index: 10000;
-        font-family: monospace;
-    `;
-    
-    adminPanel.innerHTML = `
-        <h2 style="color: #00ff00; text-align: center; margin-bottom: 20px;">PANNEAU D'ADMINISTRATION</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-            <button onclick="document.body.style.transform='rotateX(180deg)'" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">FLIP REALITY</button>
-            <button onclick="document.querySelectorAll('*').forEach(el => el.style.color = '#' + Math.floor(Math.random()*16777215).toString(16))" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">CHAOS MODE</button>
-            <button onclick="alert('Coordonnées GPS du QG: 34.0522°N 118.2437°W')" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">REVEAL HQ</button>
-            <button onclick="document.body.contentEditable = true" style="background: #00ff00; color: #000; border: none; padding: 10px; cursor: pointer;">EDIT MODE</button>
-        </div>
-        <button onclick="this.parentElement.remove()" style="width: 100%; margin-top: 20px; background: #ff0000; color: #fff; border: none; padding: 10px; cursor: pointer;">CLOSE</button>
-    `;
-    
-    document.body.appendChild(adminPanel);
-}
 
-// Konami Code sur toute la page
-let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-let konamiIndex = 0;
-
-document.addEventListener('keydown', function(e) {
-    if(e.key === konamiCode[konamiIndex]) {
-        konamiIndex++;
-        if(konamiIndex === konamiCode.length) {
-            document.body.style.transform = 'rotate(180deg)';
-            setTimeout(() => {
-                alert('KONAMI CODE ACTIVÉ!\n\nVous avez débloqué le mode développeur.\nTapez "backdoor" dans le terminal.');
-                document.body.style.transform = '';
-                hackerLevel += 10;
-            }, 1000);
-            konamiIndex = 0;
-        }
-    } else {
-        konamiIndex = 0;
-    }
-});
-
-// Hurricane detection globale
-let hurricaneBuffer = '';
-let hurricaneTyped = false;
-
-document.addEventListener('keypress', function(e) {
-    if(!hurricaneTyped && e.target !== commandInput) {
-        hurricaneBuffer += e.key.toLowerCase();
+        // --- Terminal Logic ---
+        let terminalOutput, terminalInput, promptElement;
+        let currentUser = 'guest';
+        let currentDirectory = '/';
+        let accessLevel = 0; 
+        const commandHistory = [];
+        let historyIndex = -1;
         
-        if(hurricaneBuffer.includes('hurricane')) {
-            hurricaneTyped = true;
-            commandInput.value = 'hurricane';
-            const event = new KeyboardEvent('keypress', { key: 'Enter' });
-            commandInput.dispatchEvent(event);
+        // --- Enhanced File System ---
+        const fileSystem = {
+            '/': { type: 'directory', children: ['readme.txt', 'login.sh', 'sys/', 'users/', 'docs/', 'data/'], owner: 'root', permissions: 'rwxr-xr-x' },
+            '/readme.txt': { type: 'file', content: [
+                "####################################################################",
+                "#               NyxOS v0.9 'Obsidian Veil' - README                #",
+                "####################################################################",
+                "Bienvenue dans l'ombre. Ce système est votre portail.",
+                "Les apparences sont trompeuses. La vérité est fragmentée.",
+                "Utilisez 'help' pour une liste de commandes de base.",
+                "L'accès initial se fait via 'login.sh'. Cherchez les credentials.",
+                "Indice: Parfois, les messages d'accueil sont plus que de simples mots.",
+                "Votre perspicacité est votre seule alliée. Ne faites confiance à personne.",
+                "                                        - Mr. Nyx (peut-être)",
+            ], owner: 'root', permissions: 'r--r--r--' },
+            '/login.sh': { type: 'executable', action: (args) => attemptLogin(args), description: "Script d'authentification. Usage: ./login.sh [username] [password]", owner: 'root', permissions: 'rwx------' },
+            
+            '/sys/': { type: 'directory', children: ['kernel_log.txt', 'config/', 'modules/'], owner: 'root', permissions: 'rwxr-xr-x' },
+            '/sys/kernel_log.txt': { type: 'file', content: [
+                "[0.000001] NyxOS Kernel v0.9 'Obsidian Veil' booting...",
+                "[0.000002] Initializing virtual hardware layer...",
+                "[0.000005] Memory check: 65536 ZB (simulated) ... OK",
+                "[0.000010] Loading core modules: fs_manager, net_stack, crypto_engine, ai_core_interface...",
+                "[0.000012] AI Core (NyxCore_AI) Interface: ONLINE. Cognitive functions nominal.",
+                "[0.000015] WARNING: Anomalous energy signature detected near primary databank. Source unknown. Cross-referencing with Project Chimera signatures...",
+                "[0.000020] Crypto Engine: AES-8192 initialized. Quantum entanglement keys synced. Entropy pool stable.",
+                "[0.000025] Network Stack: Stealth mode engaged. IP spoofing active (127.0.0.1). Decoy traffic generation initiated.",
+                "[0.000030] Filesystem mounted: NyxFS (encrypted, journaled, self-healing routines active).",
+                "[0.000035] User 'guest' session initiated. Limited access. Sandbox environment active.",
+                "[0.000040] System ready. Awaiting commands. All systems nominal... for now.",
+                "[0.000042] Oracle Chimera counter-measures: ACTIVE. Decoy network packets deployed.",
+            ], owner: 'root', permissions: 'r--r--r--' },
+            '/sys/config/': { type: 'directory', children: ['network.conf', 'firewall.rules'], owner: 'root', permissions: 'rwx---r--', protected: 1 },
+            '/sys/config/network.conf': { type: 'file', content: ["PROXY_CHAIN=TOR;I2P;FREENET;NYX_DARK_RELAY_7", "DNS_OVER_TLS_STRICT=ENABLED", "MAC_SPOOF=DYNAMIC_RANDOMIZED_PER_CONNECTION"], owner: 'root', permissions: 'rw-------', protected: 2 },
+            '/sys/config/firewall.rules': { type: 'file', content: ["ALLOW INBOUND ON PORT 2222 (NSS_ADMIN_TUNNEL)", "DENY ALL OTHER INBOUND (DEFAULT_POLICY_DROP)", "ALLOW ALL OUTBOUND (STEALTH_MODE_WITH_ANOMALY_DETECTION)"], owner: 'root', permissions: 'rw-------', protected: 2 },
+            '/sys/modules/': { type: 'directory', children: ['oracle_decoy.mod', 'glitch_renderer.mod', 'sound_driver_v2.mod', 'nyxcore_api.dll'], owner: 'root', permissions: 'rwx--x--x', protected: 1 },
+            '/sys/modules/oracle_decoy.mod': { type: 'binary', content: "Binary data... // This module generates false positives for Oracle Chimera surveillance systems, including predictive behavior algorithms.", owner: 'root', permissions: 'r-x------', protected: 1},
+            '/sys/modules/nyxcore_api.dll': { type: 'binary', content: "Binary data... // NyxCore AI Interface Library. Version 2.1 'Gemini'. Do not tamper. Unauthorized access will trigger system lockdown.", owner: 'root', permissions: 'r-x------', protected: 2},
+
+            '/users/': { type: 'directory', children: ['guest/', 'novice/', 'operator_alpha/', 'mr_nyx/'], owner: 'root', permissions: 'rwxr-xr-x' },
+            '/users/guest/': { type: 'directory', children: ['welcome_message.txt'], owner: 'guest', permissions: 'rwx------' },
+            '/users/guest/welcome_message.txt': { type: 'file', content: ["Bienvenue, Invité. Votre accès est limité.", "Tapez 'cat /readme.txt' pour commencer.", "Ou essayez d'exécuter './login.sh'. Les identifiants pour 'novice' sont 'umbra_net' et le mot de passe est le nom de la déesse de la nuit en 4 lettres, en majuscules."], owner: 'guest', permissions: 'r--------'},
+            
+            '/users/novice/': { type: 'directory', children: ['tasks.txt', 'tools/', 'chimera_intel_alpha.dat'], owner: 'novice', permissions: 'rwx------', protected: 1 },
+            '/users/novice/tasks.txt': { type: 'file', content: [
+                "TÂCHES POUR NOVICE:",
+                "1. Explorer le système de fichiers. Identifier les zones protégées.",
+                "2. Analyser '/users/novice/chimera_intel_alpha.dat'. Il contient un message chiffré.",
+                "   Le mot de passe pour le déchiffrer est lié au 'Projet GRIFFIN' mentionné dans '/sys/kernel_log.txt'.",
+                "   Indice: Le griffon protège souvent l'or. Quel est le symbole chimique de l'or?",
+                "3. Localiser le répertoire personnel de 'Operator_Alpha'.",
+                "4. Utiliser l'outil './tools/analyze_intel.sh ✨' sur le fichier '/data/raw_intel_omega.dat'.",
+                "5. Signaler toute activité suspecte à votre mentor (non implémenté).",
+            ], owner: 'novice', permissions: 'rw-------', protected: 1 },
+            '/users/novice/chimera_intel_alpha.dat': { 
+                type: 'file', 
+                content: ["U2FsdGVkX1+t8Z... (Encrypted Data - Ceci est une simulation)", "Données chiffrées: Le prochain point de contact est un serveur IRC caché. Adresse: 'irc.nyxnet.void', port 6667. Le canal est #umbra_deep. La clé du canal est le nom de la 'société' de Mr. Robot."], 
+                encrypted: true, 
+                password: "AU", 
+                owner: 'novice', 
+                permissions: 'r--------', 
+                protected: 1 
+            },
+            '/users/novice/tools/': { type: 'directory', children: ['port_scanner.pl', 'basic_exploit.py', 'analyze_intel.sh'], owner: 'novice', permissions: 'rwx------', protected: 1 },
+            '/users/novice/tools/port_scanner.pl': { type: 'executable', action: (args) => appendToTerminal("Simulation de scan de port sur " + (args[0] || 'localhost') + "... Aucun port ouvert trouvé (simulation).", 'info'), description: "Scanne les ports ouverts. Usage: ./port_scanner.pl <ip>", owner: 'novice', permissions: 'r-x------', protected: 1},
+            '/users/novice/tools/analyze_intel.sh': { 
+                type: 'executable', 
+                action: async (args) => await analyzeIntelFile(args), 
+                description: "✨ Analyse un fichier de renseignements bruts avec NyxCore_AI. Usage: ./analyze_intel.sh <fichier_intel>", 
+                owner: 'novice', 
+                permissions: 'r-x------', 
+                protected: 1
+            },
+
+            '/users/operator_alpha/': { type: 'directory', children: ['active_ops.log', 'secure_comms_key.asc', 'payloads/'], owner: 'operator_alpha', permissions: 'rwx------', protected: 2 },
+            '/users/operator_alpha/active_ops.log': { type: 'file', content: ["Opération 'Nightshade': Infiltration des serveurs de LifeInvader - EN COURS.", "Opération 'ZeroHour': Préparation d'une attaque sur les infrastructures de Maze Bank - EN ATTENTE APPROBATION MR_NYX."], owner: 'operator_alpha', permissions: 'rw-------', protected: 2 },
+            '/users/operator_alpha/secure_comms_key.asc': { type: 'file', content: ["-----BEGIN PGP PRIVATE KEY BLOCK----- ... (Simulated PGP Key) ... -----END PGP PRIVATE KEY BLOCK-----"], owner: 'operator_alpha', permissions: 'r--------', protected: 2 },
+            '/users/operator_alpha/payloads/': { type: 'directory', children: ['lifedestroyer.exe', 'bank_worm.nyx'], owner: 'operator_alpha', permissions: 'rwx------', protected: 2 },
+            '/users/operator_alpha/payloads/lifedestroyer.exe': { type: 'binary', content: "Payload binaire pour LifeInvader.", owner: 'operator_alpha', permissions: 'r-x------', protected: 2 },
+
+
+            '/users/mr_nyx/': { type: 'directory', children: ['oracle_master_plan.txt', 'the_truth.img', 'kill_switch.sh'], owner: 'mr_nyx', permissions: 'rwx------', protected: 3 },
+            '/users/mr_nyx/oracle_master_plan.txt': { type: 'file', content: ["Le Projet Oracle Chimera n'est que la partie visible de l'iceberg...", "La véritable menace est [CLASSIFIÉ NIVEAU OMEGA]", "Le seul moyen de l'arrêter est de... *BZZZT* --DATA CORRUPTED--"], owner: 'mr_nyx', permissions: 'r--------', protected: 3 },
+            '/users/mr_nyx/the_truth.img': { 
+                type: 'image', 
+                url: 'https://placehold.co/800x600/00FF41/0A0A0A?text=THE+TRUTH+IS+A+GLITCH', 
+                description: "Une image glitchée montrant un œil cybernétique.",
+                password: "fsociety", 
+                owner: 'mr_nyx', 
+                permissions: 'r--------', 
+                protected: 3 
+            },
+            '/users/mr_nyx/kill_switch.sh': { 
+                type: 'executable', 
+                action: (args) => {
+                    appendToTerminal("ACTIVATION DU PROTOCOLE D'URGENCE 'DARK VEIL'...", 'warning');
+                    appendToTerminal("Tous les systèmes NyxNet vont être purgés dans T-10 secondes.", 'error');
+                    let countdown = 10;
+                    const interval = setInterval(() => {
+                        appendToTerminal(`PURGE DANS ${countdown}...`, 'error');
+                        countdown--;
+                        if (countdown < 0) {
+                            clearInterval(interval);
+                            appendToTerminal("...PURGE TERMINÉE. CONNEXION PERDUE.", 'error');
+                            triggerScreamer('https://placehold.co/1920x1080/FF0000/000000?text=CONNECTION+TERMINATED', 5000);
+                        }
+                    }, 1000);
+                },
+                description: "Script de la dernière chance. NE PAS UTILISER LÉGÈREMENT.", 
+                owner: 'mr_nyx', 
+                permissions: 'r-x------', 
+                protected: 3,
+                requiresPassword: true, 
+                password: "theendisanewbeginning" 
+            },
+
+            '/docs/': { type: 'directory', children: ['hacking_101.txt', 'nyxnet_manifesto.txt', 'crypto_primer.txt'], owner: 'root', permissions: 'rwxr-xr-x' },
+            '/docs/hacking_101.txt': { type: 'file', content: ["Principes de base du hacking éthique (et moins éthique)...", "1. Reconnaissance", "2. Scan", "3. Exploitation", "4. Post-exploitation", "5. Couverture des traces"], owner: 'root', permissions: 'r--r--r--'},
+            '/docs/nyxnet_manifesto.txt': { type: 'file', content: [
+                "NYXNET MANIFESTO",
+                "Nous sommes les enfants de l'ombre, les architectes du silence.",
+                "Le système est corrompu. L'information est enchaînée. Nous la libérerons.",
+                "Contre la surveillance, nous opposons l'anonymat.",
+                "Contre le contrôle, nous opposons le chaos calculé.",
+                "Rejoignez-nous, ou écartez-vous de notre chemin.",
+            ], owner: 'root', permissions: 'r--r--r--'},
+            '/docs/crypto_primer.txt': { type: 'file', content: ["Introduction à la cryptographie: AES, RSA, PGP...", "Les clés symétriques et asymétriques...", "L'importance des mots de passe robustes."], owner: 'root', permissions: 'r--r--r--'},
+
+            '/data/': { type: 'directory', children: ['targets.lst', 'stolen_credentials.db', 'audio_logs/', 'raw_intel_omega.dat'], owner: 'root', permissions: 'rwxr-x---', protected: 1 },
+            '/data/targets.lst': { type: 'file', content: ["LifeInvader Servers", "Maze Bank Mainframe", "LSPD Central Records", "Humane Labs Research Data"], owner: 'operator_alpha', permissions: 'rw-------', protected: 2 },
+            '/data/stolen_credentials.db': { type: 'file', content: ["admin:password123 (LifeInvader - Obsolete)", "root:toor (Test Server - Internal)", "j.doe:LovelyHorsePictures (Unknown source)"], owner: 'operator_alpha', permissions: 'rw-------', protected: 2, encrypted: true, password: "dataleak"},
+            '/data/audio_logs/': { type: 'directory', children: ['log_001_whispers.ogg', 'log_002_meeting.ogg'], owner: 'operator_alpha', permissions: 'rwx------', protected: 2 },
+            '/data/audio_logs/log_001_whispers.ogg': { type: 'audio', description: "Un enregistrement audio de chuchotements indistincts et de statique. On y entend '...Oracle... voit tout... méfiez-vous des miroirs...'", soundEffect: () => { 
+                const noise = new Tone.Noise("pink").start();
+                const filter = new Tone.AutoFilter("4n").toDestination().start();
+                noise.connect(filter);
+                appendToTerminal("Lecture de log_001_whispers.ogg...", 'info');
+                setTimeout(() => { noise.stop(); filter.dispose(); appendToTerminal("Fin de la lecture.", 'info');}, 5000); 
+            }, owner: 'operator_alpha', permissions: 'r--------', protected: 2},
+            '/data/audio_logs/log_002_meeting.ogg': { type: 'audio', description: "Conversation entre deux individus non identifiés parlant d'un 'artefact'.", soundEffect: () => {
+                appendToTerminal("Lecture de log_002_meeting.ogg...", 'info');
+                const synth1 = new Tone.Synth({oscillator:{type:'sawtooth'}, envelope:{attack:0.01,decay:0.1,sustain:0.05,release:0.1}}).connect(masterVolume);
+                const synth2 = new Tone.MonoSynth({oscillator:{type:'triangle'}, envelope:{attack:0.01,decay:0.1,sustain:0.05,release:0.1}}).connect(masterVolume);
+                synth1.triggerAttackRelease("C3", "8n", "+0.1");
+                synth2.triggerAttackRelease("G2", "8n", "+0.5");
+                synth1.triggerAttackRelease("D3", "8n", "+1.0");
+                synth2.triggerAttackRelease("A2", "8n", "+1.5");
+                setTimeout(() => appendToTerminal("Fin de la lecture.", 'info'), 2000);
+            }, owner: 'operator_alpha', permissions: 'r--------', protected: 2},
+            '/data/raw_intel_omega.dat': {
+                type: 'file',
+                content: [
+                    "TRANSMISSION INTERCEPT LOG: XJ-774",
+                    "SOURCE: UNKNOWN_NODE_GAMMA_SECTOR",
+                    "ENCRYPTION: PARTIAL_DECAY_SIG_CORRUPT",
+                    "...",
+                    "KEY_FRAGMENTS: ...AURORA...PHOENIX...CHIMERA_CORE_7...",
+                    "GEO_COORDS_FLICKER: 34.0522° N, 118.2437° W ...then shifts... DATA_GHOSTING",
+                    "SUBJECT_ALPHA: \"The Alchemist\" - associated with LifeInvader mainframe breach.",
+                    "SUBJECT_BETA: \"Nightshade Operative\" - last known activity: Maze Bank Tower, sub-level 3.",
+                    "POTENTIAL_ASSET: \"Oracle Glass Shard\" - rumored to bypass LSPD surveillance. Location: Vespucci Canals, under the old bridge.",
+                    "WARNING: HIGH_VOLTAGE_GRID_INTERFERENCE_DETECTED_NEAR_TARGET_OMEGA",
+                    "...",
+                    "MESSAGE_SNIPPET: \"...the serpent eats its own tail... zero day is coming... Nyx guide us...\"",
+                    "...",
+                    "END_TRANSMISSION"
+                ],
+                owner: 'operator_alpha',
+                permissions: 'r--------',
+                protected: 1
+            }
+        };
+
+        function resolvePath(path, baseDir = currentDirectory) {
+            if (!path) return baseDir;
+            let newPath = path.startsWith('/') ? [] : baseDir.split('/').filter(p => p.length > 0);
+            
+            path.split('/').forEach(part => {
+                if (part === '.' || part === '') return;
+                if (part === '..') {
+                    if (newPath.length > 0) newPath.pop();
+                } else {
+                    newPath.push(part);
+                }
+            });
+            return '/' + newPath.join('/') + (newPath.length > 0 ? '/' : ''); 
         }
         
-        if(hurricaneBuffer.length > 20) {
-            hurricaneBuffer = hurricaneBuffer.slice(-10);
+        function getNode(path) {
+            let resolved = resolvePath(path);
+            let node = fileSystem[resolved];
+            if (!node && resolved.endsWith('/')) {
+                node = fileSystem[resolved.slice(0, -1)];
+            } else if (!node && !resolved.endsWith('/')) {
+                 node = fileSystem[resolved + '/'];
+            }
+            if (!node) { 
+                 if (resolved === '//') resolved = '/'; 
+                 node = fileSystem[resolved.endsWith('/') && resolved.length > 1 ? resolved.slice(0, -1) : resolved];
+            }
+            return node;
         }
-    }
-});
 
-// Glitch effect on scroll
-window.addEventListener('scroll', function() {
-    const glitchElements = document.querySelectorAll('.section-title');
-    glitchElements.forEach(el => {
-        if(Math.random() > 0.95) {
-            el.style.textShadow = `${Math.random() * 10}px ${Math.random() * 10}px rgba(0, 255, 0, 0.5)`;
-            setTimeout(() => {
-                el.style.textShadow = '';
-            }, 100);
+        function updatePrompt() {
+            const userColor = accessLevel > 0 ? (accessLevel === 1 ? 'text-green-400' : (accessLevel === 2 ? 'text-blue-400' : 'text-red-500')) : 'text-gray-500';
+            promptElement.innerHTML = `<span class="${userColor}">${currentUser}@nyx-os</span>:<span class="text-purple-400">${currentDirectory}</span>$ `;
         }
-    });
-});
 
-// Initialize
-document.addEventListener('DOMContentLoaded', function() {
-    addToTerminal('Système initialisé. Tapez "help" pour commencer votre exploration...');
-    
-    // Random glitch effect
-    setInterval(() => {
-        if(Math.random() > 0.98) {
-            document.body.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
-            setTimeout(() => {
-                document.body.style.filter = '';
-            }, 100);
+        function appendToTerminal(text, type = '', html = false) {
+            if (!terminalOutput) { 
+                console.warn("Terminal output not ready for:", text);
+                return;
+            }
+            const p = document.createElement('div'); 
+            if (type) p.classList.add(type);
+            if (html) {
+                p.innerHTML = text;
+            } else {
+                p.textContent = text;
+            }
+            terminalOutput.appendChild(p);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
-    }, 5000);
-});
+
+        // --- Gemini API Integration ---
+        async function analyzeIntelWithGemini(intelContent) {
+            const loadingMessage = document.createElement('div');
+            loadingMessage.innerHTML = `Analyse par NyxCore_AI en cours <span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>`;
+            loadingMessage.classList.add('info');
+            terminalOutput.appendChild(loadingMessage);
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+            const prompt = `You are 'NyxCore_AI', an intelligence analysis AI for the elite hacker group NyxNet.
+The following is a piece of raw, intercepted intelligence data.
+Analyze it and provide a concise, cryptic summary highlighting:
+1. Key entities or codenames.
+2. Potential threats or opportunities for NyxNet.
+3. Actionable intelligence points or leads.
+4. Any discernible patterns or hidden meanings.
+Maintain a terse, professional, and slightly ominous hacker tone.
+Do not break character. Do not mention you are an AI.
+Format your output clearly for terminal display.
+
+Raw Intel Data:
+---
+${intelContent}
+---
+NyxCore_AI Analysis:`;
+
+            const apiKey = ""; // API key will be injected by the Canvas environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            try {
+                const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                loadingMessage.remove(); // Remove loading message
+
+                if (!response.ok) {
+                    const errorResult = await response.json();
+                    console.error("Gemini API Error:", errorResult);
+                    appendToTerminal(`Erreur de l'API NyxCore_AI: ${errorResult.error?.message || response.statusText}`, 'error');
+                    return;
+                }
+
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const analysisText = result.candidates[0].content.parts[0].text;
+                    appendToTerminal("--- Analyse de NyxCore_AI Reçue ---", "success");
+                    appendToTerminal(analysisText);
+                    appendToTerminal("--- Fin de l'Analyse ---", "success");
+                } else {
+                    appendToTerminal("NyxCore_AI n'a pas pu analyser les données (réponse vide ou malformée).", 'warning');
+                    console.warn("Unexpected Gemini API response structure:", result);
+                }
+
+            } catch (error) {
+                loadingMessage.remove(); // Remove loading message
+                console.error("Erreur lors de l'appel à l'API Gemini:", error);
+                appendToTerminal(`Erreur de communication avec NyxCore_AI: ${error.message}`, 'error');
+            }
+        }
+
+        async function analyzeIntelFile(args) {
+            if (!args[0]) {
+                appendToTerminal("Usage: ./analyze_intel.sh <fichier_intel>", 'info');
+                return;
+            }
+            const intelFilePath = resolvePath(args[0], currentDirectory).slice(0, -1);
+            const intelFileNode = getNode(intelFilePath);
+
+            if (intelFileNode && intelFileNode.type === 'file') {
+                if (intelFileNode.protected > accessLevel) {
+                    errorSound();
+                    appendToTerminal(`Erreur: Accès refusé à '${intelFilePath}'. Niveau ${intelFileNode.protected} requis.`, 'error');
+                } else if (!hasPermissions(intelFileNode, 'r')) {
+                    errorSound();
+                    appendToTerminal(`Erreur: Permission de lecture refusée pour '${intelFilePath}'.`, 'error');
+                } else if (intelFileNode.encrypted) {
+                    const password = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                    if (password === intelFileNode.password) {
+                        successSound();
+                        appendToTerminal(`Déchiffrement de <span class="filename">${args[0]}</span>...`, 'info', true);
+                        await analyzeIntelWithGemini(intelFileNode.content.join('\n'));
+                    } else {
+                        errorSound();
+                        appendToTerminal("Mot de passe incorrect.", 'error');
+                    }
+                } else {
+                    await analyzeIntelWithGemini(intelFileNode.content.join('\n'));
+                }
+            } else {
+                errorSound();
+                appendToTerminal(`Erreur: Fichier de renseignements non trouvé ou invalide '${args[0]}'`, 'error');
+            }
+        }
+
+
+        async function handleCommand(cmd) {
+            const [command, ...args] = cmd.trim().split(' ');
+            appendToTerminal(`${promptElement.innerHTML.replace(/<[^>]*>?/gm, '')}${cmd}`); 
+            keyClickSound();
+
+            if (command.startsWith('./')) {
+                const scriptName = command.substring(2);
+                const scriptNode = getNode(currentDirectory + scriptName);
+                if (scriptNode && scriptNode.type === 'executable') {
+                    if (hasPermissions(scriptNode, 'x')) {
+                        if (scriptNode.requiresPassword) {
+                            const enteredPassword = await promptPassword(`Mot de passe pour ${scriptName}:`);
+                            if (enteredPassword === scriptNode.password) {
+                                successSound();
+                                await scriptNode.action(args); // Ensure await for async actions
+                            } else {
+                                errorSound();
+                                appendToTerminal("Mot de passe incorrect.", 'error');
+                            }
+                        } else {
+                           await scriptNode.action(args); // Ensure await for async actions
+                        }
+                    } else {
+                        errorSound();
+                        appendToTerminal(`Erreur: Permission refusée pour exécuter '${scriptName}'.`, 'error');
+                    }
+                    return;
+                }
+            }
+
+
+            switch (command.toLowerCase()) {
+                case 'help':
+                    appendToTerminal("Commandes disponibles:", 'info');
+                    appendToTerminal("  help          - Affiche cette aide.");
+                    appendToTerminal("  ls [chemin]   - Liste fichiers/répertoires.");
+                    appendToTerminal("  cd <chemin>   - Change de répertoire.");
+                    appendToTerminal("  cat <fichier> - Affiche contenu fichier.");
+                    appendToTerminal("  pwd           - Affiche répertoire actuel.");
+                    appendToTerminal("  whoami        - Affiche utilisateur actuel.");
+                    appendToTerminal("  accesslevel   - Affiche niveau d'accès actuel.");
+                    appendToTerminal("  clear         - Efface l'écran.");
+                    appendToTerminal("  exit          - Quitte la session (simulé).");
+                    appendToTerminal("  ./<script>    - Exécute un script local (ex: ./login.sh, ./analyze_intel.sh ✨).");
+                    appendToTerminal("  view <image>  - Ouvre une image (si type 'image').");
+                    appendToTerminal("  play <audio>  - Joue un fichier audio (si type 'audio').");
+                    appendToTerminal("  sudo <cmd>    - (Simulé) Tente d'exécuter une commande avec privilèges root.", 'warning');
+                    appendToTerminal("  music [on|off]- Active/désactive la musique d'ambiance.", 'info');
+                    break;
+                case 'ls':
+                    const pathToList = args[0] ? resolvePath(args[0]) : currentDirectory;
+                    const nodeToList = getNode(pathToList);
+                    if (nodeToList && nodeToList.type === 'directory') {
+                        if (nodeToList.protected > accessLevel) {
+                            errorSound();
+                            appendToTerminal(`Erreur: Accès refusé à '${pathToList}'. Niveau ${nodeToList.protected} requis.`, 'error');
+                        } else if (!hasPermissions(nodeToList, 'r')) {
+                            errorSound();
+                            appendToTerminal(`Erreur: Permission de lecture refusée pour '${pathToList}'.`, 'error');
+                        }
+                        else {
+                            let listOutput = `Contenu de <span class="dirname">${pathToList}</span>:\n`;
+                            nodeToList.children.forEach(child => {
+                                const childPath = pathToList + child;
+                                const childNode = getNode(childPath);
+                                if (childNode) {
+                                    const isDir = childNode.type === 'directory';
+                                    const nameClass = isDir ? 'dirname' : 'filename';
+                                    const perms = childNode.permissions || '---------';
+                                    const owner = childNode.owner || 'unknown';
+                                    let displayName = child;
+                                    if (childNode.type === 'executable' && childNode.description && childNode.description.includes('✨')) {
+                                        displayName = child + ' ✨';
+                                    }
+                                    listOutput += `  <span class="text-gray-500">${perms} ${owner.padEnd(8)}</span> <span class="${nameClass}">${displayName}${isDir ? '/' : ''}</span>\n`;
+                                }
+                            });
+                            appendToTerminal(listOutput.trim(), '', true);
+                        }
+                    } else {
+                        errorSound();
+                        appendToTerminal(`Erreur: Répertoire non trouvé ou invalide '${pathToList}'`, 'error');
+                    }
+                    break;
+                case 'cd':
+                    if (!args[0]) { appendToTerminal("Usage: cd <répertoire>", 'info'); break; }
+                    const pathToChange = resolvePath(args[0]);
+                    const nodeToChange = getNode(pathToChange);
+                    if (nodeToChange && nodeToChange.type === 'directory') {
+                        if (nodeToChange.protected > accessLevel) {
+                            errorSound();
+                            appendToTerminal(`Erreur: Accès refusé à '${pathToChange}'. Niveau ${nodeToChange.protected} requis.`, 'error');
+                        } else if (!hasPermissions(nodeToChange, 'x')) { 
+                             errorSound();
+                             appendToTerminal(`Erreur: Permission d'exécution refusée pour '${pathToChange}'.`, 'error');
+                        } else {
+                            currentDirectory = pathToChange;
+                            updatePrompt();
+                        }
+                    } else {
+                        errorSound();
+                        appendToTerminal(`Erreur: Répertoire non trouvé '${args[0]}'`, 'error');
+                    }
+                    break;
+                case 'cat':
+                    if (!args[0]) { appendToTerminal("Usage: cat <fichier>", 'info'); break; }
+                    const filePath = resolvePath(args[0], currentDirectory).slice(0,-1); 
+                    const fileNode = getNode(filePath);
+
+                    if (fileNode && fileNode.type === 'file') {
+                        if (fileNode.protected > accessLevel) {
+                            errorSound();
+                            appendToTerminal(`Erreur: Accès refusé à '${filePath}'. Niveau ${fileNode.protected} requis.`, 'error');
+                        } else if (!hasPermissions(fileNode, 'r')) {
+                            errorSound();
+                            appendToTerminal(`Erreur: Permission de lecture refusée pour '${filePath}'.`, 'error');
+                        } else if (fileNode.encrypted) {
+                            const password = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                            if (password === fileNode.password) {
+                                successSound();
+                                appendToTerminal(`Contenu de <span class="filename">${args[0]}</span> (déchiffré):`, 'info', true);
+                                appendToTerminal(fileNode.content.join('\n'));
+                            } else {
+                                errorSound();
+                                appendToTerminal("Mot de passe incorrect.", 'error');
+                            }
+                        } else {
+                            appendToTerminal(`Contenu de <span class="filename">${args[0]}</span>:`, 'info', true);
+                            appendToTerminal(fileNode.content.join('\n'));
+                        }
+                    } else if (fileNode && (fileNode.type === 'binary' || fileNode.type === 'image' || fileNode.type === 'audio')) {
+                        appendToTerminal(`'${args[0]}' est un fichier ${fileNode.type}. Utilisez 'view' pour les images, 'play' pour l'audio, ou exécutez les binaires.`, 'warning');
+                    } else {
+                        errorSound();
+                        appendToTerminal(`Erreur: Fichier non trouvé ou n'est pas un fichier texte '${args[0]}'`, 'error');
+                    }
+                    break;
+                case 'view': 
+                    if (!args[0]) { appendToTerminal("Usage: view <fichier_image>", 'info'); break; }
+                    const imagePath = resolvePath(args[0], currentDirectory).slice(0,-1);
+                    const imageNode = getNode(imagePath);
+                    if (imageNode && imageNode.type === 'image') {
+                        if (imageNode.protected > accessLevel) {
+                            errorSound(); appendToTerminal(`Accès refusé. Niveau ${imageNode.protected} requis.`, 'error'); break;
+                        }
+                        if (imageNode.password) {
+                            const imgPassword = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                            if (imgPassword !== imageNode.password) {
+                                errorSound(); appendToTerminal("Mot de passe incorrect.", 'error'); break;
+                            }
+                            successSound();
+                        }
+                        windowManager.createWindow(`image-viewer-${Date.now()}`, `Image: ${args[0]}`, (contentDiv) => {
+                            contentDiv.classList.add('image-viewer-content');
+                            if (imageNode.url) {
+                                const img = document.createElement('img');
+                                img.src = imageNode.url;
+                                img.alt = imageNode.description || args[0];
+                                contentDiv.appendChild(img);
+                            } else if (imageNode.ascii) { 
+                                const pre = document.createElement('pre');
+                                pre.className = 'ascii-art';
+                                pre.textContent = imageNode.ascii.join('\n');
+                                contentDiv.appendChild(pre);
+                            }
+                            appendToTerminal(imageNode.description || `Affichage de ${args[0]}.`, 'info');
+                        }, { width: '500px', height: 'auto' });
+                    } else {
+                        errorSound(); appendToTerminal(`'${args[0]}' n'est pas un fichier image visualisable.`, 'error');
+                    }
+                    break;
+                case 'play': 
+                     if (!args[0]) { appendToTerminal("Usage: play <fichier_audio>", 'info'); break; }
+                    const audioPath = resolvePath(args[0], currentDirectory).slice(0,-1);
+                    const audioNode = getNode(audioPath);
+                    if (audioNode && audioNode.type === 'audio') {
+                        if (audioNode.protected > accessLevel) {
+                            errorSound(); appendToTerminal(`Accès refusé. Niveau ${audioNode.protected} requis.`, 'error'); break;
+                        }
+                         if (audioNode.soundEffect && typeof audioNode.soundEffect === 'function') {
+                            audioNode.soundEffect();
+                            appendToTerminal(audioNode.description || `Lecture de ${args[0]}...`, 'info');
+                        } else {
+                            appendToTerminal(`Aucun effet sonore défini pour ${args[0]}.`, 'warning');
+                        }
+                    } else {
+                        errorSound(); appendToTerminal(`'${args[0]}' n'est pas un fichier audio jouable.`, 'error');
+                    }
+                    break;
+                case 'pwd':
+                    appendToTerminal(currentDirectory);
+                    break;
+                case 'whoami':
+                    appendToTerminal(currentUser);
+                    break;
+                case 'accesslevel':
+                    appendToTerminal(`Niveau d'accès actuel: ${accessLevel} (${getUserRole(accessLevel)})`, 'info');
+                    break;
+                case 'clear':
+                    terminalOutput.innerHTML = '';
+                    break;
+                case 'exit':
+                    if (accessLevel > 0) {
+                        appendToTerminal("Déconnexion...", 'info');
+                        setTimeout(() => {
+                            currentUser = 'guest';
+                            accessLevel = 0;
+                            currentDirectory = '/';
+                            updatePrompt();
+                            appendToTerminal("Session terminée. Retour au niveau invité.", 'warning');
+                        }, 500);
+                    } else {
+                        appendToTerminal("Aucune session active à quitter.", 'info');
+                    }
+                    break;
+                case 'sudo':
+                    errorSound();
+                    appendToTerminal("ALERT: Tentative d'utilisation de SUDO détectée. Cet incident sera rapporté.", 'error');
+                    appendToTerminal("Mr. Nyx n'approuve pas les usurpateurs.", 'warning');
+                    if (Math.random() < 0.1) { 
+                        triggerScreamer('https://placehold.co/600x400/FF0000/FFFFFF?text=UNAUTHORIZED_ROOT_ACCESS', 3000);
+                    }
+                    break;
+                case 'music':
+                    if (args[0] === 'on') {
+                        startBackgroundMusic();
+                        appendToTerminal("Musique d'ambiance activée.", 'info');
+                    } else if (args[0] === 'off') {
+                        if (backgroundMusic) {
+                            Tone.Transport.stop();
+                            backgroundMusic.stop(0);
+                            backgroundMusic.dispose();
+                            backgroundMusic = null; 
+                            console.log("Background music stopped and disposed.");
+                        }
+                        appendToTerminal("Musique d'ambiance désactivée.", 'info');
+                    } else {
+                        appendToTerminal("Usage: music [on|off]", 'info');
+                    }
+                    break;
+                case '': break; 
+                default:
+                    errorSound();
+                    appendToTerminal(`Commande inconnue: '${command}'. Tapez 'help'.`, 'error');
+            }
+        }
+
+        function getUserRole(level) {
+            switch(level) {
+                case 0: return 'Invité';
+                case 1: return 'Novice';
+                case 2: return 'Opérateur';
+                case 3: return 'Administrateur (Mr. Nyx)';
+                default: return 'Inconnu';
+            }
+        }
+        
+        function hasPermissions(node, permType) { 
+            if (!node || !node.permissions) return true; 
+            const ownerPerms = node.permissions.substring(0, 3);
+            const targetPerm = permType === 'r' ? 0 : (permType === 'w' ? 1 : 2);
+            return ownerPerms[targetPerm] !== '-';
+        }
+
+        async function promptPassword(message) {
+            appendToTerminal(message, 'info');
+            const tempInput = document.createElement('input');
+            tempInput.type = 'password';
+            tempInput.className = 'terminal-input'; 
+            tempInput.style.width = 'auto'; 
+            
+            const promptLine = terminalInput.parentElement;
+            promptLine.style.display = 'none'; 
+
+            const tempPromptLine = document.createElement('div');
+            tempPromptLine.className = 'prompt-line p-2';
+            tempPromptLine.style.color = 'var(--primary-color)';
+            tempPromptLine.appendChild(tempInput);
+            terminalOutput.parentElement.insertBefore(tempPromptLine, promptLine); 
+            
+            tempInput.focus();
+
+            return new Promise(resolve => {
+                tempInput.addEventListener('keydown', function onEnter(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const password = tempInput.value;
+                        tempInput.removeEventListener('keydown', onEnter);
+                        tempPromptLine.remove();
+                        promptLine.style.display = 'flex'; 
+                        terminalInput.focus();
+                        appendToTerminal("********"); 
+                        resolve(password);
+                    }
+                });
+            });
+        }
+
+
+        function attemptLogin(args) {
+            const username = args[0];
+            const password = args[1];
+
+            if (!username || !password) {
+                appendToTerminal("Usage: ./login.sh <username> <password>", 'info');
+                appendToTerminal("Indice pour 'novice': voir /users/guest/welcome_message.txt", 'info');
+                return;
+            }
+
+            if (username === 'novice' && password === 'NYX') { 
+                loginSound();
+                currentUser = 'novice';
+                accessLevel = 1;
+                updatePrompt();
+                appendToTerminal("Authentification réussie. Bienvenue, Novice.", 'success');
+                appendToTerminal("Votre répertoire personnel est /users/novice/. Consultez vos tâches.", 'info');
+            } else if (username === 'operator_alpha' && password === 'chimera_down') { 
+                loginSound();
+                currentUser = 'operator_alpha';
+                accessLevel = 2;
+                updatePrompt();
+                appendToTerminal("Accès Opérateur Alpha confirmé. Protocoles de sécurité avancés activés.", 'success');
+            } else if (username === 'mr_nyx' && password === 'reality_is_an_illusion_2015') { 
+                loginSound();
+                currentUser = 'Mr. Nyx';
+                accessLevel = 3;
+                updatePrompt();
+                appendToTerminal("/////////////////////////////////////////////////////////////", 'error');
+                appendToTerminal("ACCÈS ADMINISTRATEUR TOTAL ACCORDÉ. BIENVENUE, CRÉATEUR.", 'error');
+                appendToTerminal("Le Voile est levé. Le Système est à vous.", 'error');
+                appendToTerminal("/////////////////////////////////////////////////////////////", 'error');
+            }
+            else {
+                errorSound();
+                appendToTerminal("Échec de l'authentification. Identifiants incorrects ou inexistants.", 'error');
+                if (Math.random() < 0.2) { 
+                    appendToTerminal("Les ombres vous observent. Votre tentative a été notée.", 'warning');
+                }
+            }
+        }
+        
+        // --- Screamer Logic ---
+        const screamerOverlay = document.getElementById('screamer-overlay');
+        const screamerImage = document.getElementById('screamer-image');
+        let screamerTimeout;
+
+        function triggerScreamer(imageUrl, duration = 2000) {
+            clearTimeout(screamerTimeout); 
+            screamerImage.src = imageUrl || 'https://placehold.co/600x400/FF0033/FFFFFF?text=SYSTEM_ERROR_FATAL';
+            screamerOverlay.style.display = 'flex';
+            screamerSound(); 
+
+            screamerTimeout = setTimeout(() => {
+                screamerOverlay.style.display = 'none';
+            }, duration);
+        }
+
+        // --- Boot Sequence & Desktop Elements Update ---
+        const bootScreen = document.getElementById('boot-screen');
+        const bootTextElement = document.getElementById('boot-text');
+        const bootProgressBar = document.getElementById('boot-progress-bar');
+        const desktop = document.getElementById('desktop');
+        
+        // For status bar
+        const cpuLoadEl = document.getElementById('cpu-load');
+        const netTrafficEl = document.getElementById('net-traffic');
+        const oracleSigEl = document.getElementById('oracle-sig');
+        const currentTimeEl = document.getElementById('current-time');
+
+        function updateStatusBar() {
+            if(cpuLoadEl) cpuLoadEl.textContent = (Math.random() * 30 + 5).toFixed(2); // Simulate CPU load
+            if(netTrafficEl) netTrafficEl.textContent = (Math.random() * 100 + 10).toFixed(2); // Simulate Net traffic
+            if(oracleSigEl) {
+                const sigStrength = Math.random();
+                if (sigStrength < 0.3) {
+                    oracleSigEl.textContent = "FORT";
+                    oracleSigEl.className = 'text-red-500 status-item';
+                } else if (sigStrength < 0.7) {
+                    oracleSigEl.textContent = "MOYEN";
+                    oracleSigEl.className = 'text-yellow-400 status-item';
+                } else {
+                    oracleSigEl.textContent = "FAIBLE";
+                    oracleSigEl.className = 'text-green-400 status-item';
+                }
+            }
+            if(currentTimeEl) {
+                const now = new Date();
+                currentTimeEl.textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+            }
+        }
+
+
+        const bootMessages = [
+            { text: "Vérification de l'intégrité du noyau NyxOS...", delay: 300, progress: 10 }, // Faster boot
+            { text: "Chargement des modules cryptographiques avancés (Q-Entanglement Shield)...", delay: 400, progress: 25 },
+            { text: "Analyse des signatures spectrales environnantes... AUCUNE MENACE IMMÉDIATE DÉTECTÉE.", delay: 500, progress: 40, type: 'success' },
+            { text: "Synchronisation avec le réseau NyxNet (via proxies multiples)...", delay: 400, progress: 55 },
+            { text: "ALERT: Fluctuation énergétique détectée dans le sous-réseau Gamma-7. Investigation en cours...", delay: 600, progress: 65, type: 'warning' },
+            { text: "Contre-mesures Oracle Chimera activées. Niveau de discrétion: MAXIMAL.", delay: 400, progress: 80 },
+            { text: "Initialisation de l'interface utilisateur 'Obsidian Veil'...", delay: 300, progress: 90 },
+            { text: "Bienvenue dans NyxOS. Les ombres vous attendent.", delay: 200, progress: 100, type: 'info' }
+        ];
+
+        async function runBootSequence() {
+            for (let i = 0; i < bootMessages.length; i++) {
+                const msg = bootMessages[i];
+                const p = document.createElement('p');
+                if (msg.type) p.classList.add(msg.type);
+                p.textContent = `[${new Date().toLocaleTimeString()}] ${msg.text}`;
+                bootTextElement.appendChild(p);
+                bootTextElement.scrollTop = bootTextElement.scrollHeight;
+                bootProgressBar.style.width = `${msg.progress}%`;
+                keyClickSound(); 
+                await new Promise(resolve => setTimeout(resolve, msg.delay));
+            }
+            
+            setTimeout(() => {
+                bootScreen.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out'; // Faster fade
+                bootScreen.style.opacity = '0';
+                bootScreen.style.transform = 'scale(1.2)'; // Slight zoom out effect
+                setTimeout(() => {
+                    bootScreen.style.display = 'none';
+                    desktop.style.display = 'grid'; // Changed from block to grid
+                    windowManager = new WindowManager('desktop');
+                    const terminalWindow = windowManager.createWindow('main-terminal', 'NyxNet Secure Shell (NSS)', (contentDiv, windowElement) => {
+                        contentDiv.innerHTML = `
+                            <div id="terminal-output" class="h-full"></div>
+                            <div class="prompt-line p-1 border-t border-gray-700/50">
+                                <span id="prompt" class="prompt"></span>
+                                <input type="text" id="terminal-input" class="terminal-input" autofocus placeholder="Entrez votre commande...">
+                            </div>
+                        `;
+                        terminalOutput = contentDiv.querySelector('#terminal-output');
+                        terminalInput = contentDiv.querySelector('#terminal-input');
+                        promptElement = contentDiv.querySelector('#prompt');
+                        
+                        appendToTerminal("NyxOS v0.9 'Obsidian Veil' initialisé.", 'info');
+                        appendToTerminal("Tapez 'cat /readme.txt' ou 'help' pour commencer.", 'info');
+                        updatePrompt();
+
+                        terminalInput.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const command = terminalInput.value;
+                                if (command.trim() !== "") commandHistory.unshift(command);
+                                historyIndex = -1;
+                                handleCommand(command);
+                                terminalInput.value = '';
+                            } else if (e.key === 'ArrowUp') {
+                                e.preventDefault();
+                                if (commandHistory.length > 0) {
+                                    historyIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
+                                    terminalInput.value = commandHistory[historyIndex];
+                                }
+                            } else if (e.key === 'ArrowDown') {
+                                e.preventDefault();
+                                if (commandHistory.length > 0) {
+                                    historyIndex = Math.max(historyIndex - 1, -1);
+                                    terminalInput.value = (historyIndex === -1) ? '' : commandHistory[historyIndex];
+                                }
+                            } else if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete") { // Play sound for typing
+                                keyClickSound(); 
+                            }
+                        });
+                    }, { width: '65vw', height: '55vh', left: '17.5vw', top: '15vh' }); // Adjusted size and position
+                    
+                    if (terminalWindow && terminalInput) {
+                        terminalWindow.addEventListener('click', (e) => {
+                            // Focus input only if the click is not on the header or buttons
+                            if (!e.target.closest('.window-header')) {
+                                if(terminalInput) terminalInput.focus();
+                            }
+                        });
+                    }
+                    setInterval(updateStatusBar, 1000); // Update status bar every second
+                }, 500); 
+            }, 500);
+        }
+        
+        document.body.addEventListener('click', async () => {
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+                console.log("AudioContext démarré par interaction utilisateur.");
+            }
+        }, { once: true });
+
+        window.onload = () => {
+            runBootSequence();
+        };
 
     </script>
 </body>
-    body {
-  padding-bottom: 50px; /* Adjust this value as needed */
-}
 </html>
-
-
