@@ -308,673 +308,945 @@
     </div>
 
     <script>
-        // --- Musique Personnalisée ---
-        // MODIFIEZ CETTE LIGNE AVEC L'URL DE VOTRE FICHIER MUSICAL (MP3, OGG, WAV).
-        // Laissez vide ("") pour utiliser la musique synthétisée par défaut.
-        // Assurez-vous que l'URL est accessible (CORS activé si sur un autre domaine).
-        const customMusicUrl = ""; 
+        window.onload = () => {
+            // --- Musique Personnalisée ---
+            const customMusicUrl = ""; 
 
-        // --- Digital Rain Background ---
-        const canvas = document.getElementById('matrix-rain');
-        const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
-        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const nums = '0123456789';
-        const alphabet = katakana + latin + nums;
-        const fontSize = 16;
-        const columns = canvas.width / fontSize;
-        const rainDrops = [];
-        for (let x = 0; x < columns; x++) { rainDrops[x] = 1; }
+            // --- Digital Rain Background ---
+            const canvas = document.getElementById('matrix-rain');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const nums = '0123456789';
+            const alphabet = katakana + latin + nums;
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const rainDrops = [];
+            for (let x = 0; x < columns; x++) { rainDrops[x] = 1; }
 
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(1, 3, 2, 0.05)'; // Fond noir bleuté très transparent
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#00FF41'; // Vert Matrix
-            ctx.font = fontSize + 'px monospace';
+            function drawMatrix() {
+                ctx.fillStyle = 'rgba(1, 3, 2, 0.05)'; 
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00FF41'; 
+                ctx.font = fontSize + 'px monospace';
 
-            for (let i = 0; i < rainDrops.length; i++) {
-                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
-                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    rainDrops[i] = 0;
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        rainDrops[i] = 0;
+                    }
+                    rainDrops[i]++;
                 }
-                rainDrops[i]++;
             }
-        }
-        let matrixInterval = setInterval(drawMatrix, 40); // Ajustez la vitesse ici
+            let matrixInterval = setInterval(drawMatrix, 40); 
 
-        // --- Global Variables & Tone.js Setup ---
-        let masterVolume = new Tone.Volume(-15).toDestination(); // Baisser un peu le volume global
-        const keyClickSound = () => {
-             new Tone.Synth({
-                oscillator: { type: 'triangle' }, volume: -22, 
-                envelope: { attack: 0.001, decay: 0.03, sustain: 0, release: 0.05 }
-            }).connect(masterVolume).triggerAttackRelease('E2', '128n', Tone.now());
-        };
-        const errorSound = () => new Tone.Synth({ oscillator: {type: 'sawtooth', partials: [1, 0.5, 0.2] }, volume: -10, envelope: {attack:0.01, decay:0.3, sustain:0, release:0.2}}).connect(masterVolume).triggerAttackRelease('F#1', '8n');
-        const successSound = () => new Tone.Synth({ oscillator: {type: 'sine'}, volume: -15, envelope: {attack:0.01, decay:0.1, sustain:0.1, release:0.2}}).connect(masterVolume).triggerAttackRelease('A4', '16n', Tone.now(), 0.7);
-        const loginSound = () => new Tone.FMSynth({harmonicity:1.5, modulationIndex:8, detune:0, oscillator:{type:"sine"}, envelope:{attack:0.02,decay:0.2,sustain:0.3,release:0.6}, modulation:{type:"triangle"}, modulationEnvelope:{attack:0.02,decay:0.3,sustain:0.2,release:0.6}}).connect(masterVolume).triggerAttackRelease("D4", "2n");
-        const screamerSound = () => new Tone.NoiseSynth({noise:{type:'white', playbackRate: 0.5}, volume: -5, envelope:{attack:0.005,decay:1.0,sustain:0,release:0.8}}).connect(masterVolume).triggerAttackRelease("1n");
-        
-        let backgroundMusic;
-        let backgroundMusicPlayer;
+            // --- Global Variables & Tone.js Setup ---
+            let masterVolume = new Tone.Volume(-15).toDestination(); 
+            const keyClickSound = () => {
+                 new Tone.Synth({
+                    oscillator: { type: 'triangle' }, volume: -22, 
+                    envelope: { attack: 0.001, decay: 0.03, sustain: 0, release: 0.05 }
+                }).connect(masterVolume).triggerAttackRelease('E2', '128n', Tone.now());
+            };
+            const errorSound = () => new Tone.Synth({ oscillator: {type: 'sawtooth', partials: [1, 0.5, 0.2] }, volume: -10, envelope: {attack:0.01, decay:0.3, sustain:0, release:0.2}}).connect(masterVolume).triggerAttackRelease('F#1', '8n');
+            const successSound = () => new Tone.Synth({ oscillator: {type: 'sine'}, volume: -15, envelope: {attack:0.01, decay:0.1, sustain:0.1, release:0.2}}).connect(masterVolume).triggerAttackRelease('A4', '16n', Tone.now(), 0.7);
+            const loginSound = () => new Tone.FMSynth({harmonicity:1.5, modulationIndex:8, detune:0, oscillator:{type:"sine"}, envelope:{attack:0.02,decay:0.2,sustain:0.3,release:0.6}, modulation:{type:"triangle"}, modulationEnvelope:{attack:0.02,decay:0.3,sustain:0.2,release:0.6}}).connect(masterVolume).triggerAttackRelease("D4", "2n");
+            const screamerSound = () => new Tone.NoiseSynth({noise:{type:'white', playbackRate: 0.5}, volume: -5, envelope:{attack:0.005,decay:1.0,sustain:0,release:0.8}}).connect(masterVolume).triggerAttackRelease("1n");
+            
+            let backgroundMusic;
+            let backgroundMusicPlayer;
 
-        function startSynthMusic() {
-            if (backgroundMusic && backgroundMusic.state === "started") return;
-            const reverb = new Tone.Reverb(2.5).connect(masterVolume);
-            const delay = new Tone.FeedbackDelay("8n", 0.3).connect(reverb);
-            backgroundMusic = new Tone.Loop(time => {
-                const notes = ["A1", "C2", "E2", "G#1"];
-                const randomNote = notes[Math.floor(Math.random() * notes.length)];
-                new Tone.AMSynth({ harmonicity: 1.5, oscillator: { type: "sawtooth" }, envelope: { attack: 1, decay: 0.5, sustain: 0.8, release: 2 }, modulation: { type: "sine" }, modulationEnvelope: { attack: 0.8, decay: 0.2, sustain: 0.5, release: 1 } })
-                    .connect(delay).triggerAttackRelease(randomNote, "1m", time, 0.3);
-            }, "3m").start(0); 
-            Tone.Transport.start();
-            appendToTerminal("Musique d'ambiance synthétisée activée.", 'info');
-        }
-
-        function startBackgroundMusic() {
-            if (backgroundMusic && backgroundMusic.state === "started") return;
-            if (backgroundMusicPlayer && backgroundMusicPlayer.state === "started") return;
-
-            if (customMusicUrl) {
-                backgroundMusicPlayer = new Tone.Player({
-                    url: customMusicUrl, loop: true, volume: -10,
-                }).toDestination();
-                Tone.loaded().then(() => {
-                    backgroundMusicPlayer.start();
-                    Tone.Transport.start();
-                    appendToTerminal("Musique personnalisée démarrée.", 'success');
-                }).catch(err => {
-                    appendToTerminal("Erreur chargement musique perso: " + err, 'error');
-                    startSynthMusic(); 
-                });
-            } else {
-                startSynthMusic(); 
-            }
-        }
-
-        function stopBackgroundMusic() {
-            if (backgroundMusic) {
-                backgroundMusic.stop(0).dispose();
-                backgroundMusic = null;
-            }
-            if (backgroundMusicPlayer) {
-                backgroundMusicPlayer.stop(0).dispose();
-                backgroundMusicPlayer = null;
-            }
-            Tone.Transport.stop(); // Peut arrêter d'autres choses, attention si utilisé ailleurs.
-            appendToTerminal("Musique d'ambiance désactivée.", 'info');
-        }
-
-
-        // --- Window Manager ---
-        class WindowManager {
-             constructor(desktopId) {
-                this.desktop = document.getElementById(desktopId);
-                this.mainArea = document.createElement('div'); // Create main area
-                this.mainArea.style.gridArea = 'main';
-                this.mainArea.style.position = 'relative'; // Crucial for absolute positioning
-                this.desktop.appendChild(this.mainArea);
-
-                this.windows = [];
-                this.zIndexCounter = 100;
-                this.activeWindow = null;
+            function startSynthMusic() {
+                if (backgroundMusic && backgroundMusic.state === "started") return;
+                const reverb = new Tone.Reverb(2.5).connect(masterVolume);
+                const delay = new Tone.FeedbackDelay("8n", 0.3).connect(reverb);
+                backgroundMusic = new Tone.Loop(time => {
+                    const notes = ["A1", "C2", "E2", "G#1"];
+                    const randomNote = notes[Math.floor(Math.random() * notes.length)];
+                    new Tone.AMSynth({ harmonicity: 1.5, oscillator: { type: "sawtooth" }, envelope: { attack: 1, decay: 0.5, sustain: 0.8, release: 2 }, modulation: { type: "sine" }, modulationEnvelope: { attack: 0.8, decay: 0.2, sustain: 0.5, release: 1 } })
+                        .connect(delay).triggerAttackRelease(randomNote, "1m", time, 0.3);
+                }, "3m").start(0); 
+                Tone.Transport.start();
+                if (terminalOutput) appendToTerminal("Musique d'ambiance synthétisée activée.", 'info');
             }
 
-            createWindow(id, title, contentGenerator, options = {}) {
-                const win = document.createElement('div');
-                win.id = `window-${id}`;
-                win.className = 'window';
-                win.style.width = options.width || '600px';
-                win.style.height = options.height || '400px';
-                
-                const mainAreaRect = this.mainArea.getBoundingClientRect();
+            function startBackgroundMusic() {
+                if (backgroundMusic && backgroundMusic.state === "started") return;
+                if (backgroundMusicPlayer && backgroundMusicPlayer.state === "started") return;
 
-                win.style.left = options.left || `${Math.max(10, Math.min(Math.random() * (mainAreaRect.width - parseInt(win.style.width, 10) - 20), mainAreaRect.width - parseInt(win.style.width, 10) - 10))}px`;
-                win.style.top = options.top || `${Math.max(10, Math.min(Math.random() * (mainAreaRect.height - parseInt(win.style.height, 10) - 20), mainAreaRect.height - parseInt(win.style.height, 10) - 10))}px`;
-                
-                win.style.zIndex = this.zIndexCounter++;
-
-                const header = document.createElement('div');
-                header.className = 'window-header';
-                header.innerHTML = `<span class="window-title">${title}</span>
-                                    <div class="window-buttons">
-                                        <span class="minimize-btn" title="Minimiser"></span>
-                                        <span class="maximize-btn" title="Agrandir (Non implémenté)"></span>
-                                        <span class="close-btn" title="Fermer"></span>
-                                    </div>`;
-                
-                const content = document.createElement('div');
-                content.className = 'window-content';
-                
-                win.appendChild(header);
-                win.appendChild(content); 
-
-                if (typeof contentGenerator === 'string') {
-                    content.innerHTML = contentGenerator;
+                if (customMusicUrl) {
+                    backgroundMusicPlayer = new Tone.Player({
+                        url: customMusicUrl, loop: true, volume: -10,
+                    }).toDestination();
+                    Tone.loaded().then(() => {
+                        backgroundMusicPlayer.start();
+                        Tone.Transport.start();
+                        if (terminalOutput) appendToTerminal("Musique personnalisée démarrée.", 'success');
+                    }).catch(err => {
+                        if (terminalOutput) appendToTerminal("Erreur chargement musique perso: " + err, 'error');
+                        startSynthMusic(); 
+                    });
                 } else {
-                    contentGenerator(content, win); 
+                    startSynthMusic(); 
+                }
+            }
+
+            function stopBackgroundMusic() {
+                if (backgroundMusic) {
+                    backgroundMusic.stop(0).dispose();
+                    backgroundMusic = null;
+                }
+                if (backgroundMusicPlayer) {
+                    backgroundMusicPlayer.stop(0).dispose();
+                    backgroundMusicPlayer = null;
+                }
+                Tone.Transport.stop(); 
+                if (terminalOutput) appendToTerminal("Musique d'ambiance désactivée.", 'info');
+            }
+
+            // --- DOM Element variables ---
+            const bootScreen = document.getElementById('boot-screen');
+            const desktop = document.getElementById('desktop');
+            const bootTextElement = document.getElementById('boot-text');
+            const bootProgressBar = document.getElementById('boot-progress-bar');
+            
+            const uptimeEl = document.getElementById('uptime');
+            const pktInEl = document.getElementById('pkt-in');
+            const pktOutEl = document.getElementById('pkt-out');
+            const accessWidgetEl = document.getElementById('access-widget');
+            const oracleWidgetEl = document.getElementById('oracle-widget');
+            const currentTimeFooterEl = document.getElementById('current-time-footer');
+            const cpuGraphEl = document.getElementById('cpu-graph');
+            const netGraphEl = document.getElementById('net-graph');
+            const screamerOverlay = document.getElementById('screamer-overlay');
+            const screamerImage = document.getElementById('screamer-image');
+
+
+            // --- Window Manager ---
+            class WindowManager {
+                 constructor(desktopId) {
+                    this.desktop = document.getElementById(desktopId);
+                    this.mainArea = document.createElement('div'); 
+                    this.mainArea.style.gridArea = 'main';
+                    this.mainArea.style.position = 'relative'; 
+                    this.desktop.appendChild(this.mainArea);
+
+                    this.windows = [];
+                    this.zIndexCounter = 100;
+                    this.activeWindow = null;
                 }
 
-                this.mainArea.appendChild(win); // Append to mainArea, not desktop
-                this.windows.push(win);
-                this.setActive(win);
-
-                this.makeDraggable(win, header);
-                header.querySelector('.close-btn').addEventListener('click', () => this.closeWindow(win));
-                win.addEventListener('mousedown', () => this.setActive(win));
-                
-                return win;
-            }
-
-            setActive(win) {
-                if (this.activeWindow && this.activeWindow !== win) {
-                    this.activeWindow.classList.remove('active-window');
-                }
-                this.activeWindow = win;
-                win.classList.add('active-window');
-                win.style.zIndex = this.zIndexCounter++;
-            }
-
-            closeWindow(win) {
-                win.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                win.style.opacity = '0';
-                win.style.transform = 'scale(0.8)';
-                setTimeout(() => {
-                    win.remove();
-                    this.windows = this.windows.filter(w => w !== win);
-                    if (this.activeWindow === win) this.activeWindow = null;
-                }, 300);
-            }
-
-            makeDraggable(element, handle) {
-                 let offsetX, offsetY, isDragging = false;
-                 const mainArea = this.mainArea; // Reference to main area
-
-                handle.addEventListener('mousedown', (e) => {
-                    if (e.target.closest('.window-buttons')) return; 
-                    isDragging = true;
-                    offsetX = e.clientX - element.offsetLeft;
-                    offsetY = e.clientY - element.offsetTop;
-                    this.setActive(element);
-                    document.body.style.cursor = 'move';
-                    e.preventDefault(); 
-                });
-                document.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    let newX = e.clientX - offsetX;
-                    let newY = e.clientY - offsetY;
+                createWindow(id, title, contentGenerator, options = {}) {
+                    const win = document.createElement('div');
+                    win.id = `window-${id}`;
+                    win.className = 'window';
+                    win.style.width = options.width || '600px';
+                    win.style.height = options.height || '400px';
                     
-                    const mainAreaRect = mainArea.getBoundingClientRect();
-                    // Use mainAreaRect for boundary checks, but remember element's offset is relative to mainArea
-                    newX = Math.max(0, Math.min(newX, mainAreaRect.width - element.offsetWidth));
-                    newY = Math.max(0, Math.min(newY, mainAreaRect.height - element.offsetHeight));
+                    const mainAreaRect = this.mainArea.getBoundingClientRect();
 
-                    element.style.left = `${newX}px`;
-                    element.style.top = `${newY}px`;
-                });
-                document.addEventListener('mouseup', () => {
-                    if(isDragging) {
-                        isDragging = false;
-                        document.body.style.cursor = 'default';
+                    win.style.left = options.left || `${Math.max(10, Math.min(Math.random() * (mainAreaRect.width - parseInt(win.style.width, 10) - 20), mainAreaRect.width - parseInt(win.style.width, 10) - 10))}px`;
+                    win.style.top = options.top || `${Math.max(10, Math.min(Math.random() * (mainAreaRect.height - parseInt(win.style.height, 10) - 20), mainAreaRect.height - parseInt(win.style.height, 10) - 10))}px`;
+                    
+                    win.style.zIndex = this.zIndexCounter++;
+
+                    const header = document.createElement('div');
+                    header.className = 'window-header';
+                    header.innerHTML = `<span class="window-title">${title}</span>
+                                        <div class="window-buttons">
+                                            <span class="minimize-btn" title="Minimiser"></span>
+                                            <span class="maximize-btn" title="Agrandir (Non implémenté)"></span>
+                                            <span class="close-btn" title="Fermer"></span>
+                                        </div>`;
+                    
+                    const content = document.createElement('div');
+                    content.className = 'window-content';
+                    
+                    win.appendChild(header);
+                    win.appendChild(content); 
+
+                    if (typeof contentGenerator === 'string') {
+                        content.innerHTML = contentGenerator;
+                    } else {
+                        contentGenerator(content, win); 
+                    }
+
+                    this.mainArea.appendChild(win); 
+                    this.windows.push(win);
+                    this.setActive(win);
+
+                    this.makeDraggable(win, header);
+                    header.querySelector('.close-btn').addEventListener('click', () => this.closeWindow(win));
+                    win.addEventListener('mousedown', () => this.setActive(win));
+                    
+                    return win;
+                }
+
+                setActive(win) {
+                    if (this.activeWindow && this.activeWindow !== win) {
+                        this.activeWindow.classList.remove('active-window');
+                    }
+                    this.activeWindow = win;
+                    win.classList.add('active-window');
+                    win.style.zIndex = this.zIndexCounter++;
+                }
+
+                closeWindow(win) {
+                    win.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    win.style.opacity = '0';
+                    win.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        win.remove();
+                        this.windows = this.windows.filter(w => w !== win);
+                        if (this.activeWindow === win) this.activeWindow = null;
+                    }, 300);
+                }
+
+                makeDraggable(element, handle) {
+                     let offsetX, offsetY, isDragging = false;
+                     const mainArea = this.mainArea; 
+
+                    handle.addEventListener('mousedown', (e) => {
+                        if (e.target.closest('.window-buttons')) return; 
+                        isDragging = true;
+                        offsetX = e.clientX - element.offsetLeft;
+                        offsetY = e.clientY - element.offsetTop;
+                        this.setActive(element);
+                        document.body.style.cursor = 'move';
+                        e.preventDefault(); 
+                    });
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isDragging) return;
+                        let newX = e.clientX - offsetX;
+                        let newY = e.clientY - offsetY;
+                        
+                        const mainAreaRect = mainArea.getBoundingClientRect();
+                        newX = Math.max(0, Math.min(newX, mainAreaRect.width - element.offsetWidth));
+                        newY = Math.max(0, Math.min(newY, mainAreaRect.height - element.offsetHeight));
+
+                        element.style.left = `${newX}px`;
+                        element.style.top = `${newY}px`;
+                    });
+                    document.addEventListener('mouseup', () => {
+                        if(isDragging) {
+                            isDragging = false;
+                            document.body.style.cursor = 'default';
+                        }
+                    });
+                }
+                
+                getWindowContent(id) {
+                    const win = document.getElementById(`window-${id}`);
+                    return win ? win.querySelector('.window-content') : null;
+                }
+            }
+            windowManager = new WindowManager('desktop'); // Initialize after desktop div is available
+
+            // --- Terminal Logic & File System ---
+            // terminalOutput, terminalInput, promptElement will be set when terminal window is created
+            currentUser = 'guest';
+            currentDirectory = '/';
+            accessLevel = 0; 
+            commandHistory.length = 0; // Clear history on reload
+            historyIndex = -1;
+            
+            const fileSystem = {
+                '/': { type: 'directory', children: ['readme.txt', 'login.sh', 'sys/', 'users/', 'docs/', 'data/'], owner: 'root', permissions: 'rwxr-xr-x' },
+                '/readme.txt': { type: 'file', content: [
+                    "####################################################################",
+                    "#                NyxOS v1.0 'Digital Veil' - README                #",
+                    "####################################################################",
+                    "Bienvenue dans l'ombre. Ce système est votre portail.",
+                    "Utilisez 'help' pour une liste de commandes.",
+                    "Commencez par './login.sh'. Les indices sont partout...",
+                    "                                        - Mr. Nyx",
+                ], owner: 'root', permissions: 'r--r--r--' },
+                '/login.sh': { type: 'executable', action: (args) => attemptLogin(args), description: "Script d'authentification.", owner: 'root', permissions: 'rwx------' },
+                
+                '/sys/': { type: 'directory', children: ['kernel_log.txt', 'config/', 'modules/'], owner: 'root', permissions: 'rwxr-xr-x' },
+                '/sys/kernel_log.txt': { type: 'file', content: ["[...]", "[INFO] AI Core (NyxCore_AI) Interface: ONLINE.", "[WARN] Anomalous energy signature detected near primary databank.", "[INFO] Oracle Chimera counter-measures: ACTIVE."], owner: 'root', permissions: 'r--r--r--' },
+                '/sys/config/': { type: 'directory', children: ['network.conf', 'firewall.rules'], owner: 'root', permissions: 'rwx---r--', protected: 1 },
+                '/sys/config/network.conf': { type: 'file', content: ["PROXY_CHAIN=TOR;I2P;NYX_RELAY_7", "DNS_OVER_TLS_STRICT=ENABLED"], owner: 'root', permissions: 'rw-------', protected: 2 },
+                '/sys/config/firewall.rules': { type: 'file', content: ["ALLOW INBOUND ON PORT 2222", "DENY ALL OTHER INBOUND"], owner: 'root', permissions: 'rw-------', protected: 2 },
+                '/sys/modules/': { type: 'directory', children: ['nyxcore_api.dll'], owner: 'root', permissions: 'rwx--x--x', protected: 1 },
+                '/sys/modules/nyxcore_api.dll': { type: 'binary', content: "Binary data... // NyxCore AI Interface Library. v2.1.", owner: 'root', permissions: 'r-x------', protected: 2},
+
+                '/users/': { type: 'directory', children: ['guest/', 'novice/', 'operator_alpha/', 'mr_nyx/'], owner: 'root', permissions: 'rwxr-xr-x' },
+                '/users/guest/': { type: 'directory', children: ['welcome_message.txt'], owner: 'guest', permissions: 'rwx------' },
+                '/users/guest/welcome_message.txt': { type: 'file', content: [
+                    "Bienvenue, Invité. Votre accès est limité.", 
+                    "Indice #1: Pour 'novice', le login est 'umbra_net'. Le mot de passe est le nom Français pour 'nuit' en 4 lettres, en majuscules."
+                    ], owner: 'guest', permissions: 'r--------'},
+                
+                '/users/novice/': { type: 'directory', children: ['tasks.txt', 'tools/', 'chimera_intel_alpha.dat'], owner: 'novice', permissions: 'rwx------', protected: 1 },
+                '/users/novice/tasks.txt': { type: 'file', content: [
+                    "TÂCHES POUR NOVICE:",
+                    "1. Analyser '/users/novice/chimera_intel_alpha.dat'.",
+                    "   Indice #2: Le griffon protège l'or. Le symbole chimique est le mot de passe.",
+                    "2. Utiliser './tools/analyze_intel.sh ✨' sur '/data/raw_intel_omega.dat'.",
+                ], owner: 'novice', permissions: 'rw-------', protected: 1 },
+                '/users/novice/chimera_intel_alpha.dat': { 
+                    type: 'file', 
+                    content: ["DATA CHIFTRÉE:", "IRC: irc.nyxnet.void:6667", "Canal: #umbra_deep", "Clé: Le nom de la 'société' de Mr. Robot."], 
+                    encrypted: true, 
+                    password: "AU",
+                    owner: 'novice', permissions: 'r--------', protected: 1 
+                },
+                '/users/novice/tools/': { type: 'directory', children: ['analyze_intel.sh'], owner: 'novice', permissions: 'rwx------', protected: 1 },
+                '/users/novice/tools/analyze_intel.sh': { type: 'executable', action: async (args) => await analyzeIntelFile(args), description: "✨ Analyse renseignements bruts. Usage: ./analyze_intel.sh <fichier>", owner: 'novice', permissions: 'r-x------', protected: 1},
+
+                '/users/operator_alpha/': { type: 'directory', children: [], owner: 'operator_alpha', permissions: 'rwx------', protected: 2 },
+                '/users/mr_nyx/': { type: 'directory', children: ['the_truth.img', 'kill_switch.sh'], owner: 'mr_nyx', permissions: 'rwx------', protected: 3 },
+                '/users/mr_nyx/the_truth.img': { type: 'image', url: 'https://placehold.co/800x600/00FF41/0A0A0A?text=THE+TRUTH+IS+A+GLITCH', description: "Une image glitchée.", password: "fsociety", owner: 'mr_nyx', permissions: 'r--------', protected: 3 },
+                '/users/mr_nyx/kill_switch.sh': { type: 'executable', action: (args) => { /* ... */ }, description: "Script de la dernière chance.", owner: 'mr_nyx', permissions: 'r-x------', protected: 3, requiresPassword: true, password: "theendisanewbeginning" },
+
+                '/docs/': { type: 'directory', children: ['nyxnet_manifesto.txt'], owner: 'root', permissions: 'rwxr-xr-x' },
+                '/docs/nyxnet_manifesto.txt': { type: 'file', content: ["Nous sommes NyxNet. Nous sommes l'ombre.", "Nous voyons la corruption.", "Nous agissons."], owner: 'root', permissions: 'r--r--r--'},
+
+                '/data/': { type: 'directory', children: ['raw_intel_omega.dat'], owner: 'root', permissions: 'rwxr-x---', protected: 1 },
+                '/data/raw_intel_omega.dat': { type: 'file', content: ["INTERCEPT: ...AURORA...PHOENIX...CHIMERA_CORE_7...", "GEO_COORDS: 34.0522° N, 118.2437° W...", "SUBJECT: \"The Alchemist\" ... LifeInvader ...", "ASSET: \"Oracle Glass Shard\" ... Vespucci Canals..."], owner: 'operator_alpha', permissions: 'r--------', protected: 1 }
+            };
+
+            function resolvePath(path, baseDir = currentDirectory) {
+                if (!path) return baseDir;
+                let newPath = path.startsWith('/') ? [] : baseDir.split('/').filter(p => p.length > 0);
+                
+                path.split('/').forEach(part => {
+                    if (part === '.' || part === '') return;
+                    if (part === '..') {
+                        if (newPath.length > 0) newPath.pop();
+                    } else {
+                        newPath.push(part);
                     }
                 });
+                return '/' + newPath.join('/') + (newPath.length > 0 ? '/' : ''); 
             }
             
-            getWindowContent(id) {
-                const win = document.getElementById(`window-${id}`);
-                return win ? win.querySelector('.window-content') : null;
-            }
-        }
-        let windowManager;
-
-        // --- Terminal Logic & File System ---
-        let terminalOutput, terminalInput, promptElement;
-        let currentUser = 'guest';
-        let currentDirectory = '/';
-        let accessLevel = 0; 
-        const commandHistory = [];
-        let historyIndex = -1;
-        
-        const fileSystem = {
-            '/': { type: 'directory', children: ['readme.txt', 'login.sh', 'sys/', 'users/', 'docs/', 'data/'], owner: 'root', permissions: 'rwxr-xr-x' },
-            '/readme.txt': { type: 'file', content: [
-                "####################################################################",
-                "#                NyxOS v1.0 'Digital Veil' - README                #",
-                "####################################################################",
-                "Bienvenue dans l'ombre. Ce système est votre portail.",
-                "Utilisez 'help' pour une liste de commandes.",
-                "Commencez par './login.sh'. Les indices sont partout...",
-                "                                        - Mr. Nyx",
-            ], owner: 'root', permissions: 'r--r--r--' },
-            '/login.sh': { type: 'executable', action: (args) => attemptLogin(args), description: "Script d'authentification.", owner: 'root', permissions: 'rwx------' },
-            
-            '/sys/': { type: 'directory', children: ['kernel_log.txt', 'config/', 'modules/'], owner: 'root', permissions: 'rwxr-xr-x' },
-            '/sys/kernel_log.txt': { type: 'file', content: ["[...]", "[INFO] AI Core (NyxCore_AI) Interface: ONLINE.", "[WARN] Anomalous energy signature detected near primary databank.", "[INFO] Oracle Chimera counter-measures: ACTIVE."], owner: 'root', permissions: 'r--r--r--' },
-            '/sys/config/': { type: 'directory', children: ['network.conf', 'firewall.rules'], owner: 'root', permissions: 'rwx---r--', protected: 1 },
-            '/sys/config/network.conf': { type: 'file', content: ["PROXY_CHAIN=TOR;I2P;NYX_RELAY_7", "DNS_OVER_TLS_STRICT=ENABLED"], owner: 'root', permissions: 'rw-------', protected: 2 },
-            '/sys/config/firewall.rules': { type: 'file', content: ["ALLOW INBOUND ON PORT 2222", "DENY ALL OTHER INBOUND"], owner: 'root', permissions: 'rw-------', protected: 2 },
-            '/sys/modules/': { type: 'directory', children: ['nyxcore_api.dll'], owner: 'root', permissions: 'rwx--x--x', protected: 1 },
-            '/sys/modules/nyxcore_api.dll': { type: 'binary', content: "Binary data... // NyxCore AI Interface Library. v2.1.", owner: 'root', permissions: 'r-x------', protected: 2},
-
-            '/users/': { type: 'directory', children: ['guest/', 'novice/', 'operator_alpha/', 'mr_nyx/'], owner: 'root', permissions: 'rwxr-xr-x' },
-            '/users/guest/': { type: 'directory', children: ['welcome_message.txt'], owner: 'guest', permissions: 'rwx------' },
-            '/users/guest/welcome_message.txt': { type: 'file', content: [
-                "Bienvenue, Invité. Votre accès est limité.", 
-                "Indice #1: Pour 'novice', le login est 'umbra_net'. Le mot de passe est le nom Français pour 'nuit' en 4 lettres, en majuscules."
-                ], owner: 'guest', permissions: 'r--------'},
-            
-            '/users/novice/': { type: 'directory', children: ['tasks.txt', 'tools/', 'chimera_intel_alpha.dat'], owner: 'novice', permissions: 'rwx------', protected: 1 },
-            '/users/novice/tasks.txt': { type: 'file', content: [
-                "TÂCHES POUR NOVICE:",
-                "1. Analyser '/users/novice/chimera_intel_alpha.dat'.",
-                "   Indice #2: Le griffon protège l'or. Le symbole chimique est le mot de passe.",
-                "2. Utiliser './tools/analyze_intel.sh ✨' sur '/data/raw_intel_omega.dat'.",
-            ], owner: 'novice', permissions: 'rw-------', protected: 1 },
-            '/users/novice/chimera_intel_alpha.dat': { 
-                type: 'file', 
-                content: ["DATA CHIFTRÉE:", "IRC: irc.nyxnet.void:6667", "Canal: #umbra_deep", "Clé: Le nom de la 'société' de Mr. Robot."], 
-                encrypted: true, 
-                password: "AU",
-                owner: 'novice', permissions: 'r--------', protected: 1 
-            },
-            '/users/novice/tools/': { type: 'directory', children: ['analyze_intel.sh'], owner: 'novice', permissions: 'rwx------', protected: 1 },
-            '/users/novice/tools/analyze_intel.sh': { type: 'executable', action: async (args) => await analyzeIntelFile(args), description: "✨ Analyse renseignements bruts. Usage: ./analyze_intel.sh <fichier>", owner: 'novice', permissions: 'r-x------', protected: 1},
-
-            '/users/operator_alpha/': { type: 'directory', children: [], owner: 'operator_alpha', permissions: 'rwx------', protected: 2 },
-            '/users/mr_nyx/': { type: 'directory', children: ['the_truth.img', 'kill_switch.sh'], owner: 'mr_nyx', permissions: 'rwx------', protected: 3 },
-            '/users/mr_nyx/the_truth.img': { type: 'image', url: 'https://placehold.co/800x600/00FF41/0A0A0A?text=THE+TRUTH+IS+A+GLITCH', description: "Une image glitchée.", password: "fsociety", owner: 'mr_nyx', permissions: 'r--------', protected: 3 },
-            '/users/mr_nyx/kill_switch.sh': { type: 'executable', action: (args) => { /* ... */ }, description: "Script de la dernière chance.", owner: 'mr_nyx', permissions: 'r-x------', protected: 3, requiresPassword: true, password: "theendisanewbeginning" },
-
-            '/docs/': { type: 'directory', children: ['nyxnet_manifesto.txt'], owner: 'root', permissions: 'rwxr-xr-x' },
-            '/docs/nyxnet_manifesto.txt': { type: 'file', content: ["Nous sommes NyxNet. Nous sommes l'ombre.", "Nous voyons la corruption.", "Nous agissons."], owner: 'root', permissions: 'r--r--r--'},
-
-            '/data/': { type: 'directory', children: ['raw_intel_omega.dat'], owner: 'root', permissions: 'rwxr-x---', protected: 1 },
-            '/data/raw_intel_omega.dat': { type: 'file', content: ["INTERCEPT: ...AURORA...PHOENIX...CHIMERA_CORE_7...", "GEO_COORDS: 34.0522° N, 118.2437° W...", "SUBJECT: \"The Alchemist\" ... LifeInvader ...", "ASSET: \"Oracle Glass Shard\" ... Vespucci Canals..."], owner: 'operator_alpha', permissions: 'r--------', protected: 1 }
-        };
-
-        // --- Le reste du JavaScript (fonctions de commandes, login, etc.) ---
-        // ... (Coller le JS de la version précédente ici, mais...)
-        // --- MODIFICATION DANS attemptLogin ---
-        function attemptLogin(args) {
-            const username = args[0];
-            const password = args[1];
-
-            if (!username || !password) {
-                appendToTerminal("Usage: ./login.sh <username> <password>", 'info');
-                appendToTerminal("Indice pour 'novice': voir /users/guest/welcome_message.txt", 'info');
-                return;
+            function getNode(path) {
+                let resolved = resolvePath(path);
+                let node = fileSystem[resolved];
+                if (!node && resolved.endsWith('/')) {
+                    node = fileSystem[resolved.slice(0, -1)];
+                } else if (!node && !resolved.endsWith('/')) {
+                     node = fileSystem[resolved + '/'];
+                }
+                if (!node) { 
+                     if (resolved === '//') resolved = '/'; 
+                     node = fileSystem[resolved.endsWith('/') && resolved.length > 1 ? resolved.slice(0, -1) : resolved];
+                }
+                return node;
             }
 
-            // *** CORRECTION ICI ***
-            if (username === 'novice' && password === 'NUIT') { 
-                loginSound();
-                currentUser = 'novice';
-                accessLevel = 1;
-                updatePrompt();
-                appendToTerminal("Authentification réussie. Bienvenue, Novice.", 'success');
-                appendToTerminal("Votre répertoire personnel est /users/novice/. Consultez vos tâches.", 'info');
-            } else if (username === 'operator_alpha' && password === 'chimera_down') { 
-                loginSound();
-                currentUser = 'operator_alpha';
-                accessLevel = 2;
-                updatePrompt();
-                appendToTerminal("Accès Opérateur Alpha confirmé. Protocoles de sécurité avancés activés.", 'success');
-            } else if (username === 'mr_nyx' && password === 'reality_is_an_illusion_2015') { 
-                loginSound();
-                currentUser = 'Mr. Nyx';
-                accessLevel = 3;
-                updatePrompt();
-                appendToTerminal("/////////////////////////////////////////////////////////////", 'error');
-                appendToTerminal("ACCÈS ADMINISTRATEUR TOTAL ACCORDÉ. BIENVENUE, CRÉATEUR.", 'error');
-                appendToTerminal("Le Voile est levé. Le Système est à vous.", 'error');
-                appendToTerminal("/////////////////////////////////////////////////////////////", 'error');
+            function updatePrompt() {
+                if (!promptElement) return; // Guard clause
+                const userColor = accessLevel > 0 ? (accessLevel === 1 ? 'text-green-400' : (accessLevel === 2 ? 'text-blue-400' : 'text-red-500')) : 'text-gray-500';
+                promptElement.innerHTML = `<span class="${userColor}">${currentUser}@nyx-os</span>:<span class="text-purple-400">${currentDirectory}</span>$ `;
             }
-            else {
-                errorSound();
-                appendToTerminal("Échec de l'authentification. Identifiants incorrects ou inexistants.", 'error');
-                if (Math.random() < 0.2) { 
-                    appendToTerminal("Les ombres vous observent. Votre tentative a été notée.", 'warning');
+
+            function appendToTerminal(text, type = '', html = false) {
+                if (!terminalOutput) { 
+                    console.warn("Terminal output not ready for:", text);
+                    return;
+                }
+                const p = document.createElement('div'); 
+                if (type) p.classList.add(type);
+                if (html) {
+                    p.innerHTML = text;
+                } else {
+                    p.textContent = text;
+                }
+                terminalOutput.appendChild(p);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+
+            async function analyzeIntelWithGemini(intelContent) {
+                const loadingMessage = document.createElement('div');
+                loadingMessage.innerHTML = `Analyse par NyxCore_AI en cours <span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>`;
+                loadingMessage.classList.add('info');
+                terminalOutput.appendChild(loadingMessage);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+
+                const prompt = `You are 'NyxCore_AI', an intelligence analysis AI for the elite hacker group NyxNet.
+The following is a piece of raw, intercepted intelligence data.
+Analyze it and provide a concise, cryptic summary highlighting:
+1. Key entities or codenames.
+2. Potential threats or opportunities for NyxNet.
+3. Actionable intelligence points or leads.
+4. Any discernible patterns or hidden meanings.
+Maintain a terse, professional, and slightly ominous hacker tone.
+Do not break character. Do not mention you are an AI.
+Format your output clearly for terminal display.
+
+Raw Intel Data:
+---
+${intelContent}
+---
+NyxCore_AI Analysis:`;
+
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                
+                try {
+                    const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    loadingMessage.remove(); 
+
+                    if (!response.ok) {
+                        const errorResult = await response.json();
+                        console.error("Gemini API Error:", errorResult);
+                        appendToTerminal(`Erreur de l'API NyxCore_AI: ${errorResult.error?.message || response.statusText}`, 'error');
+                        return;
+                    }
+
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates.length > 0 &&
+                        result.candidates[0].content && result.candidates[0].content.parts &&
+                        result.candidates[0].content.parts.length > 0) {
+                        const analysisText = result.candidates[0].content.parts[0].text;
+                        appendToTerminal("--- Analyse de NyxCore_AI Reçue ---", "success");
+                        appendToTerminal(analysisText);
+                        appendToTerminal("--- Fin de l'Analyse ---", "success");
+                    } else {
+                        appendToTerminal("NyxCore_AI n'a pas pu analyser les données (réponse vide ou malformée).", 'warning');
+                        console.warn("Unexpected Gemini API response structure:", result);
+                    }
+
+                } catch (error) {
+                    loadingMessage.remove(); 
+                    console.error("Erreur lors de l'appel à l'API Gemini:", error);
+                    appendToTerminal(`Erreur de communication avec NyxCore_AI: ${error.message}`, 'error');
                 }
             }
-        }
-        
-        // ... (Reste du JS: resolvePath, getNode, appendToTerminal, handleCommand, promptPassword, etc.) ...
-        // ... (Assurez-vous que toutes les fonctions JS de la version précédente sont ici) ...
-        // --- COLler ICI TOUT LE JAVASCRIPT PRÉCÉDENT, EN GARDANT LA FONCTION attemptLogin MODIFIÉE ---
-        // (Pour des raisons de longueur, je ne recopie pas tout le JS, mais il doit être présent)
-        // Inclure : WindowManager, resolvePath, getNode, updatePrompt, appendToTerminal,
-        // analyzeIntelWithGemini, analyzeIntelFile, handleCommand, getUserRole, hasPermissions,
-        // promptPassword, triggerScreamer, runBootSequence, updateStatusBar, Initialisation...
 
-        // --- Assurez-vous que handleCommand est à jour ---
-        async function handleCommand(cmd) {
-            const [command, ...args] = cmd.trim().split(' ');
-            appendToTerminal(`${promptElement.innerHTML.replace(/<[^>]*>?/gm, '')}${cmd}`); 
-            keyClickSound();
+            async function analyzeIntelFile(args) {
+                if (!args[0]) {
+                    appendToTerminal("Usage: ./analyze_intel.sh <fichier_intel>", 'info');
+                    return;
+                }
+                const intelFilePath = resolvePath(args[0], currentDirectory).slice(0, -1);
+                const intelFileNode = getNode(intelFilePath);
 
-            if (command.startsWith('./')) {
-                const scriptName = command.substring(2);
-                const scriptPath = currentDirectory + scriptName;
-                const scriptNode = getNode(scriptPath); // Utiliser le chemin complet
-                if (scriptNode && scriptNode.type === 'executable') {
-                    if (hasPermissions(scriptNode, 'x')) {
-                        if (scriptNode.requiresPassword) {
-                            const enteredPassword = await promptPassword(`Mot de passe pour ${scriptName}:`);
-                            if (enteredPassword === scriptNode.password) {
-                                successSound();
-                                await scriptNode.action(args);
-                            } else {
-                                errorSound();
-                                appendToTerminal("Mot de passe incorrect.", 'error');
-                            }
+                if (intelFileNode && intelFileNode.type === 'file') {
+                    if (intelFileNode.protected > accessLevel) {
+                        errorSound();
+                        appendToTerminal(`Erreur: Accès refusé à '${intelFilePath}'. Niveau ${intelFileNode.protected} requis.`, 'error');
+                    } else if (!hasPermissions(intelFileNode, 'r')) {
+                        errorSound();
+                        appendToTerminal(`Erreur: Permission de lecture refusée pour '${intelFilePath}'.`, 'error');
+                    } else if (intelFileNode.encrypted) {
+                        const password = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                        if (password === intelFileNode.password) {
+                            successSound();
+                            appendToTerminal(`Déchiffrement de <span class="filename">${args[0]}</span>...`, 'info', true);
+                            await analyzeIntelWithGemini(intelFileNode.content.join('\n'));
                         } else {
-                           await scriptNode.action(args);
+                            errorSound();
+                            appendToTerminal("Mot de passe incorrect.", 'error');
                         }
                     } else {
-                        errorSound();
-                        appendToTerminal(`Erreur: Permission refusée pour exécuter '${scriptName}'.`, 'error');
+                        await analyzeIntelWithGemini(intelFileNode.content.join('\n'));
                     }
-                    return;
                 } else {
-                     errorSound();
-                     appendToTerminal(`Erreur: Script non trouvé ou non exécutable '${scriptName}'.`, 'error');
-                     return;
+                    errorSound();
+                    appendToTerminal(`Erreur: Fichier de renseignements non trouvé ou invalide '${args[0]}'`, 'error');
                 }
             }
 
+            function attemptLogin(args) {
+                const username = args[0];
+                const password = args[1];
 
-            switch (command.toLowerCase()) {
-                case 'help':
-                    appendToTerminal("Commandes disponibles:", 'info');
-                    appendToTerminal("  help          - Affiche cette aide.");
-                    appendToTerminal("  ls [chemin]   - Liste fichiers/répertoires.");
-                    appendToTerminal("  cd <chemin>   - Change de répertoire.");
-                    appendToTerminal("  cat <fichier> - Affiche contenu fichier.");
-                    appendToTerminal("  pwd           - Affiche répertoire actuel.");
-                    appendToTerminal("  whoami        - Affiche utilisateur actuel.");
-                    appendToTerminal("  accesslevel   - Affiche niveau d'accès actuel.");
-                    appendToTerminal("  clear         - Efface l'écran.");
-                    appendToTerminal("  exit          - Quitte la session (simulé).");
-                    appendToTerminal("  ./<script>    - Exécute un script local (ex: ./login.sh, ./analyze_intel.sh ✨).");
-                    appendToTerminal("  view <image>  - Ouvre une image (si type 'image').");
-                    appendToTerminal("  play <audio>  - Joue un fichier audio (si type 'audio').");
-                    appendToTerminal("  sudo <cmd>    - (Simulé) Tente d'exécuter une commande avec privilèges root.", 'warning');
-                    appendToTerminal("  music [on|off]- Active/désactive la musique d'ambiance.", 'info');
-                    appendToTerminal("  setmusic <url>- Définit une URL pour la musique (temporaire).", 'info');
-                    break;
-                case 'ls':
-                    const pathToList = args[0] ? resolvePath(args[0]) : currentDirectory;
-                    const nodeToList = getNode(pathToList);
-                    if (nodeToList && nodeToList.type === 'directory') {
-                        if (nodeToList.protected > accessLevel) {
+                if (!username || !password) {
+                    appendToTerminal("Usage: ./login.sh <username> <password>", 'info');
+                    appendToTerminal("Indice pour 'novice': voir /users/guest/welcome_message.txt", 'info');
+                    return;
+                }
+
+                if (username === 'novice' && password === 'NUIT') { 
+                    loginSound();
+                    currentUser = 'novice';
+                    accessLevel = 1;
+                    updatePrompt();
+                    appendToTerminal("Authentification réussie. Bienvenue, Novice.", 'success');
+                    appendToTerminal("Votre répertoire personnel est /users/novice/. Consultez vos tâches.", 'info');
+                } else if (username === 'operator_alpha' && password === 'chimera_down') { 
+                    loginSound();
+                    currentUser = 'operator_alpha';
+                    accessLevel = 2;
+                    updatePrompt();
+                    appendToTerminal("Accès Opérateur Alpha confirmé. Protocoles de sécurité avancés activés.", 'success');
+                } else if (username === 'mr_nyx' && password === 'reality_is_an_illusion_2015') { 
+                    loginSound();
+                    currentUser = 'Mr. Nyx';
+                    accessLevel = 3;
+                    updatePrompt();
+                    appendToTerminal("/////////////////////////////////////////////////////////////", 'error');
+                    appendToTerminal("ACCÈS ADMINISTRATEUR TOTAL ACCORDÉ. BIENVENUE, CRÉATEUR.", 'error');
+                    appendToTerminal("Le Voile est levé. Le Système est à vous.", 'error');
+                    appendToTerminal("/////////////////////////////////////////////////////////////", 'error');
+                }
+                else {
+                    errorSound();
+                    appendToTerminal("Échec de l'authentification. Identifiants incorrects ou inexistants.", 'error');
+                    if (Math.random() < 0.2) { 
+                        appendToTerminal("Les ombres vous observent. Votre tentative a été notée.", 'warning');
+                    }
+                }
+            }
+            
+            async function handleCommand(cmd) {
+                const [command, ...args] = cmd.trim().split(' ');
+                appendToTerminal(`${promptElement.innerHTML.replace(/<[^>]*>?/gm, '')}${cmd}`); 
+                keyClickSound();
+
+                if (command.startsWith('./')) {
+                    const scriptName = command.substring(2);
+                    const scriptPath = currentDirectory + scriptName;
+                    const scriptNode = getNode(scriptPath); 
+                    if (scriptNode && scriptNode.type === 'executable') {
+                        if (hasPermissions(scriptNode, 'x')) {
+                            if (scriptNode.requiresPassword) {
+                                const enteredPassword = await promptPassword(`Mot de passe pour ${scriptName}:`);
+                                if (enteredPassword === scriptNode.password) {
+                                    successSound();
+                                    await scriptNode.action(args);
+                                } else {
+                                    errorSound();
+                                    appendToTerminal("Mot de passe incorrect.", 'error');
+                                }
+                            } else {
+                               await scriptNode.action(args);
+                            }
+                        } else {
                             errorSound();
-                            appendToTerminal(`Erreur: Accès refusé à '${pathToList}'. Niveau ${nodeToList.protected} requis.`, 'error');
-                        } else if (!hasPermissions(nodeToList, 'r')) {
-                            errorSound();
-                            appendToTerminal(`Erreur: Permission de lecture refusée pour '${pathToList}'.`, 'error');
+                            appendToTerminal(`Erreur: Permission refusée pour exécuter '${scriptName}'.`, 'error');
                         }
-                        else {
-                            let listOutput = `Contenu de <span class="dirname">${pathToList}</span>:\n`;
-                            nodeToList.children.forEach(child => {
-                                const childPath = pathToList + child;
-                                const childNode = getNode(childPath);
-                                if (childNode) {
-                                    const isDir = childNode.type === 'directory';
-                                    const nameClass = isDir ? 'dirname' : 'filename';
-                                    const perms = childNode.permissions || '---------';
-                                    const owner = childNode.owner || 'unknown';
-                                    let displayName = child;
-                                    if (childNode.type === 'executable' && childNode.description && childNode.description.includes('✨')) {
-                                        displayName = child + ' ✨';
+                        return;
+                    } else {
+                         errorSound();
+                         appendToTerminal(`Erreur: Script non trouvé ou non exécutable '${scriptName}'.`, 'error');
+                         return;
+                    }
+                }
+
+                switch (command.toLowerCase()) {
+                    case 'help':
+                        appendToTerminal("Commandes disponibles:", 'info');
+                        appendToTerminal("  help          - Affiche cette aide.");
+                        appendToTerminal("  ls [chemin]   - Liste fichiers/répertoires.");
+                        appendToTerminal("  cd <chemin>   - Change de répertoire.");
+                        appendToTerminal("  cat <fichier> - Affiche contenu fichier.");
+                        appendToTerminal("  pwd           - Affiche répertoire actuel.");
+                        appendToTerminal("  whoami        - Affiche utilisateur actuel.");
+                        appendToTerminal("  accesslevel   - Affiche niveau d'accès actuel.");
+                        appendToTerminal("  clear         - Efface l'écran.");
+                        appendToTerminal("  exit          - Quitte la session (simulé).");
+                        appendToTerminal("  ./<script>    - Exécute un script local (ex: ./login.sh, ./analyze_intel.sh ✨).");
+                        appendToTerminal("  view <image>  - Ouvre une image (si type 'image').");
+                        appendToTerminal("  play <audio>  - Joue un fichier audio (si type 'audio').");
+                        appendToTerminal("  sudo <cmd>    - (Simulé) Tente d'exécuter une commande avec privilèges root.", 'warning');
+                        appendToTerminal("  music [on|off]- Active/désactive la musique d'ambiance.", 'info');
+                        appendToTerminal("  setmusic <url>- Définit une URL pour la musique (temporaire).", 'info');
+                        break;
+                    case 'ls':
+                        const pathToList = args[0] ? resolvePath(args[0]) : currentDirectory;
+                        const nodeToList = getNode(pathToList);
+                        if (nodeToList && nodeToList.type === 'directory') {
+                            if (nodeToList.protected > accessLevel) {
+                                errorSound();
+                                appendToTerminal(`Erreur: Accès refusé à '${pathToList}'. Niveau ${nodeToList.protected} requis.`, 'error');
+                            } else if (!hasPermissions(nodeToList, 'r')) {
+                                errorSound();
+                                appendToTerminal(`Erreur: Permission de lecture refusée pour '${pathToList}'.`, 'error');
+                            }
+                            else {
+                                let listOutput = `Contenu de <span class="dirname">${pathToList}</span>:\n`;
+                                nodeToList.children.forEach(child => {
+                                    const childPath = pathToList + child;
+                                    const childNode = getNode(childPath);
+                                    if (childNode) {
+                                        const isDir = childNode.type === 'directory';
+                                        const nameClass = isDir ? 'dirname' : 'filename';
+                                        const perms = childNode.permissions || '---------';
+                                        const owner = childNode.owner || 'unknown';
+                                        let displayName = child;
+                                        if (childNode.type === 'executable' && childNode.description && childNode.description.includes('✨')) {
+                                            displayName = child + ' ✨';
+                                        }
+                                        listOutput += `  <span class="text-gray-500">${perms} ${owner.padEnd(8)}</span> <span class="${nameClass}">${displayName}${isDir ? '/' : ''}</span>\n`;
                                     }
-                                    listOutput += `  <span class="text-gray-500">${perms} ${owner.padEnd(8)}</span> <span class="${nameClass}">${displayName}${isDir ? '/' : ''}</span>\n`;
+                                });
+                                appendToTerminal(listOutput.trim(), '', true);
+                            }
+                        } else {
+                            errorSound();
+                            appendToTerminal(`Erreur: Répertoire non trouvé ou invalide '${pathToList}'`, 'error');
+                        }
+                        break;
+                    case 'cd':
+                        if (!args[0]) { appendToTerminal("Usage: cd <répertoire>", 'info'); break; }
+                        const pathToChange = resolvePath(args[0]);
+                        const nodeToChange = getNode(pathToChange);
+                        if (nodeToChange && nodeToChange.type === 'directory') {
+                            if (nodeToChange.protected > accessLevel) {
+                                errorSound();
+                                appendToTerminal(`Erreur: Accès refusé à '${pathToChange}'. Niveau ${nodeToChange.protected} requis.`, 'error');
+                            } else if (!hasPermissions(nodeToChange, 'x')) { 
+                                 errorSound();
+                                 appendToTerminal(`Erreur: Permission d'exécution refusée pour '${pathToChange}'.`, 'error');
+                            } else {
+                                currentDirectory = pathToChange;
+                                updatePrompt();
+                            }
+                        } else {
+                            errorSound();
+                            appendToTerminal(`Erreur: Répertoire non trouvé '${args[0]}'`, 'error');
+                        }
+                        break;
+                    case 'cat':
+                        if (!args[0]) { appendToTerminal("Usage: cat <fichier>", 'info'); break; }
+                        const filePath = resolvePath(args[0], currentDirectory).slice(0,-1); 
+                        const fileNode = getNode(filePath);
+
+                        if (fileNode && fileNode.type === 'file') {
+                            if (fileNode.protected > accessLevel) {
+                                errorSound();
+                                appendToTerminal(`Erreur: Accès refusé à '${filePath}'. Niveau ${fileNode.protected} requis.`, 'error');
+                            } else if (!hasPermissions(fileNode, 'r')) {
+                                errorSound();
+                                appendToTerminal(`Erreur: Permission de lecture refusée pour '${filePath}'.`, 'error');
+                            } else if (fileNode.encrypted) {
+                                const password = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                                if (password === fileNode.password) {
+                                    successSound();
+                                    appendToTerminal(`Contenu de <span class="filename">${args[0]}</span> (déchiffré):`, 'info', true);
+                                    appendToTerminal(fileNode.content.join('\n'));
+                                } else {
+                                    errorSound();
+                                    appendToTerminal("Mot de passe incorrect.", 'error');
+                                }
+                            } else {
+                                appendToTerminal(`Contenu de <span class="filename">${args[0]}</span>:`, 'info', true);
+                                appendToTerminal(fileNode.content.join('\n'));
+                            }
+                        } else if (fileNode && (fileNode.type === 'binary' || fileNode.type === 'image' || fileNode.type === 'audio')) {
+                            appendToTerminal(`'${args[0]}' est un fichier ${fileNode.type}. Utilisez 'view' pour les images, 'play' pour l'audio, ou exécutez les binaires.`, 'warning');
+                        } else {
+                            errorSound();
+                            appendToTerminal(`Erreur: Fichier non trouvé ou n'est pas un fichier texte '${args[0]}'`, 'error');
+                        }
+                        break;
+                    case 'view': 
+                        if (!args[0]) { appendToTerminal("Usage: view <fichier_image>", 'info'); break; }
+                        const imagePath = resolvePath(args[0], currentDirectory).slice(0,-1);
+                        const imageNode = getNode(imagePath);
+                        if (imageNode && imageNode.type === 'image') {
+                            if (imageNode.protected > accessLevel) {
+                                errorSound(); appendToTerminal(`Accès refusé. Niveau ${imageNode.protected} requis.`, 'error'); break;
+                            }
+                            if (imageNode.password) {
+                                const imgPassword = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                                if (imgPassword !== imageNode.password) {
+                                    errorSound(); appendToTerminal("Mot de passe incorrect.", 'error'); break;
+                                }
+                                successSound();
+                            }
+                            windowManager.createWindow(`image-viewer-${Date.now()}`, `Image: ${args[0]}`, (contentDiv) => {
+                                contentDiv.classList.add('image-viewer-content');
+                                if (imageNode.url) {
+                                    const img = document.createElement('img');
+                                    img.src = imageNode.url;
+                                    img.alt = imageNode.description || args[0];
+                                    contentDiv.appendChild(img);
+                                } else if (imageNode.ascii) { 
+                                    const pre = document.createElement('pre');
+                                    pre.className = 'ascii-art';
+                                    pre.textContent = imageNode.ascii.join('\n');
+                                    contentDiv.appendChild(pre);
+                                }
+                                appendToTerminal(imageNode.description || `Affichage de ${args[0]}.`, 'info');
+                            }, { width: '500px', height: 'auto' });
+                        } else {
+                            errorSound(); appendToTerminal(`'${args[0]}' n'est pas un fichier image visualisable.`, 'error');
+                        }
+                        break;
+                    case 'play': 
+                         if (!args[0]) { appendToTerminal("Usage: play <fichier_audio>", 'info'); break; }
+                        const audioPath = resolvePath(args[0], currentDirectory).slice(0,-1);
+                        const audioNode = getNode(audioPath);
+                        if (audioNode && audioNode.type === 'audio') {
+                            if (audioNode.protected > accessLevel) {
+                                errorSound(); appendToTerminal(`Accès refusé. Niveau ${audioNode.protected} requis.`, 'error'); break;
+                            }
+                             if (audioNode.soundEffect && typeof audioNode.soundEffect === 'function') {
+                                audioNode.soundEffect();
+                                appendToTerminal(audioNode.description || `Lecture de ${args[0]}...`, 'info');
+                            } else {
+                                appendToTerminal(`Aucun effet sonore défini pour ${args[0]}.`, 'warning');
+                            }
+                        } else {
+                            errorSound(); appendToTerminal(`'${args[0]}' n'est pas un fichier audio jouable.`, 'error');
+                        }
+                        break;
+                    case 'pwd': appendToTerminal(currentDirectory); break;
+                    case 'whoami': appendToTerminal(currentUser); break;
+                    case 'accesslevel': appendToTerminal(`Niveau d'accès actuel: ${accessLevel} (${getUserRole(accessLevel)})`, 'info'); break;
+                    case 'clear': if(terminalOutput) terminalOutput.innerHTML = ''; break;
+                    case 'exit': 
+                        if (accessLevel > 0) {
+                            appendToTerminal("Déconnexion...", 'info');
+                            setTimeout(() => {
+                                currentUser = 'guest';
+                                accessLevel = 0;
+                                currentDirectory = '/';
+                                updatePrompt();
+                                appendToTerminal("Session terminée. Retour au niveau invité.", 'warning');
+                            }, 500);
+                        } else {
+                            appendToTerminal("Aucune session active à quitter.", 'info');
+                        }
+                        break;
+                    case 'sudo': 
+                        errorSound();
+                        appendToTerminal("ALERT: Tentative d'utilisation de SUDO détectée. Cet incident sera rapporté.", 'error');
+                        appendToTerminal("Mr. Nyx n'approuve pas les usurpateurs.", 'warning');
+                        if (Math.random() < 0.1) { 
+                            triggerScreamer('https://placehold.co/600x400/FF0000/FFFFFF?text=UNAUTHORIZED_ROOT_ACCESS', 3000);
+                        }
+                        break;
+                    case 'music':
+                        if (args[0] === 'on') { startBackgroundMusic(); } 
+                        else if (args[0] === 'off') { stopBackgroundMusic(); } 
+                        else { appendToTerminal("Usage: music [on|off]", 'info'); }
+                        break;
+                    case 'setmusic':
+                        if (args[0]) {
+                            appendToTerminal(`Tentative de chargement de la musique depuis : ${args[0]}`, 'info');
+                            if (backgroundMusicPlayer || backgroundMusic) stopBackgroundMusic();
+                            const tempPlayer = new Tone.Player({ url: args[0], loop: true, volume: -10 }).toDestination();
+                            Tone.loaded().then(() => { tempPlayer.start(); backgroundMusicPlayer = tempPlayer; Tone.Transport.start(); appendToTerminal("Nouvelle musique démarrée.", 'success'); }).catch(err => { appendToTerminal("Erreur chargement: " + err, 'error'); });
+                        } else { appendToTerminal("Usage: setmusic <url>", 'info'); }
+                        break;
+                    case '': break; 
+                    default:
+                        errorSound();
+                        appendToTerminal(`Commande inconnue: '${command}'. Tapez 'help'.`, 'error');
+                }
+            }
+
+            function getUserRole(level) { 
+                switch(level) {
+                    case 0: return 'Invité';
+                    case 1: return 'Novice';
+                    case 2: return 'Opérateur';
+                    case 3: return 'Administrateur';
+                    default: return 'Inconnu';
+                }
+            }
+
+            function hasPermissions(node, permType) { 
+                if (!node || !node.permissions) return true; 
+                const ownerPerms = node.permissions.substring(0, 3);
+                const targetPerm = permType === 'r' ? 0 : (permType === 'w' ? 1 : 2);
+                return ownerPerms[targetPerm] !== '-';
+            }
+
+            async function promptPassword(message) {
+                appendToTerminal(message, 'info');
+                const tempInput = document.createElement('input');
+                tempInput.type = 'password';
+                tempInput.className = 'terminal-input'; 
+                tempInput.style.width = 'auto'; 
+                
+                const promptLine = terminalInput.parentElement;
+                promptLine.style.display = 'none'; 
+
+                const tempPromptLine = document.createElement('div');
+                tempPromptLine.className = 'prompt-line p-2';
+                tempPromptLine.style.color = 'var(--primary-color)';
+                tempPromptLine.appendChild(tempInput);
+                terminalOutput.parentElement.insertBefore(tempPromptLine, promptLine); 
+                
+                tempInput.focus();
+
+                return new Promise(resolve => {
+                    tempInput.addEventListener('keydown', function onEnter(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const password = tempInput.value;
+                            tempInput.removeEventListener('keydown', onEnter);
+                            tempPromptLine.remove();
+                            promptLine.style.display = 'flex'; 
+                            terminalInput.focus();
+                            appendToTerminal("********"); 
+                            resolve(password);
+                        }
+                    });
+                });
+            }
+            
+            let screamerTimeout;
+            function triggerScreamer(imageUrl, duration = 2000) {
+                clearTimeout(screamerTimeout); 
+                if(screamerImage) screamerImage.src = imageUrl || 'https://placehold.co/600x400/FF0033/FFFFFF?text=SYSTEM_ERROR_FATAL';
+                if(screamerOverlay) screamerOverlay.style.display = 'flex';
+                screamerSound(); 
+
+                screamerTimeout = setTimeout(() => {
+                    if(screamerOverlay) screamerOverlay.style.display = 'none';
+                }, duration);
+            }
+
+            const bootMessages = [
+                { text: "Vérification de l'intégrité du noyau NyxOS...", delay: 300, progress: 10 },
+                { text: "Chargement des modules cryptographiques avancés (Q-Entanglement Shield)...", delay: 400, progress: 25 },
+                { text: "Analyse des signatures spectrales environnantes... AUCUNE MENACE IMMÉDIATE DÉTECTÉE.", delay: 500, progress: 40, type: 'success' },
+                { text: "Synchronisation avec le réseau NyxNet (via proxies multiples)...", delay: 400, progress: 55 },
+                { text: "ALERT: Fluctuation énergétique détectée dans le sous-réseau Gamma-7. Investigation en cours...", delay: 600, progress: 65, type: 'warning' },
+                { text: "Contre-mesures Oracle Chimera activées. Niveau de discrétion: MAXIMAL.", delay: 400, progress: 80 },
+                { text: "Initialisation de l'interface utilisateur 'Obsidian Veil'...", delay: 300, progress: 90 },
+                { text: "Bienvenue dans NyxOS. Les ombres vous attendent.", delay: 200, progress: 100, type: 'info' }
+            ];
+
+            async function runBootSequence() {
+                for (let i = 0; i < bootMessages.length; i++) {
+                    const msg = bootMessages[i];
+                    if (bootTextElement) {
+                        const p = document.createElement('p');
+                        if (msg.type) p.classList.add(msg.type);
+                        p.textContent = `[${new Date().toLocaleTimeString()}] ${msg.text}`;
+                        bootTextElement.appendChild(p);
+                        bootTextElement.scrollTop = bootTextElement.scrollHeight;
+                    }
+                    if (bootProgressBar) bootProgressBar.style.width = `${msg.progress}%`;
+                    keyClickSound(); 
+                    await new Promise(resolve => setTimeout(resolve, msg.delay));
+                }
+                
+                setTimeout(() => {
+                    if (bootScreen) {
+                        bootScreen.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out'; 
+                        bootScreen.style.opacity = '0';
+                        bootScreen.style.transform = 'scale(1.2)'; 
+                    }
+                    setTimeout(() => {
+                        if (bootScreen) bootScreen.style.display = 'none';
+                        if (desktop) desktop.style.display = 'grid'; 
+                        
+                        const terminalWindow = windowManager.createWindow('main-terminal', 'NyxNet Secure Shell (NSS)', (contentDiv, windowElement) => {
+                            contentDiv.innerHTML = `
+                                <div id="terminal-output" style="height: calc(100% - 40px); overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;"></div>
+                                <div class="prompt-line p-1 border-t border-gray-700/50" style="height: 30px;">
+                                    <span id="prompt" class="prompt"></span>
+                                    <input type="text" id="terminal-input" class="terminal-input" autofocus placeholder="Entrez votre commande...">
+                                </div>
+                            `;
+                            terminalOutput = contentDiv.querySelector('#terminal-output');
+                            terminalInput = contentDiv.querySelector('#terminal-input');
+                            promptElement = contentDiv.querySelector('#prompt');
+                            
+                            appendToTerminal("NyxOS v1.0 'Digital Veil' initialisé.", 'info');
+                            appendToTerminal("Tapez 'cat /readme.txt' ou 'help' pour commencer.", 'info');
+                            updatePrompt();
+
+                            terminalInput.addEventListener('keydown', (e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    const command = terminalInput.value;
+                                    if (command.trim() !== "") commandHistory.unshift(command);
+                                    historyIndex = -1;
+                                    handleCommand(command);
+                                    terminalInput.value = '';
+                                } else if (e.key === 'ArrowUp') {
+                                    e.preventDefault();
+                                    if (commandHistory.length > 0) {
+                                        historyIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
+                                        terminalInput.value = commandHistory[historyIndex];
+                                    }
+                                } else if (e.key === 'ArrowDown') {
+                                    e.preventDefault();
+                                    if (commandHistory.length > 0) {
+                                        historyIndex = Math.max(historyIndex - 1, -1);
+                                        terminalInput.value = (historyIndex === -1) ? '' : commandHistory[historyIndex];
+                                    }
+                                } else if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete") { 
+                                    keyClickSound(); 
                                 }
                             });
-                            appendToTerminal(listOutput.trim(), '', true);
-                        }
-                    } else {
-                        errorSound();
-                        appendToTerminal(`Erreur: Répertoire non trouvé ou invalide '${pathToList}'`, 'error');
-                    }
-                    break;
-                case 'cd':
-                    if (!args[0]) { appendToTerminal("Usage: cd <répertoire>", 'info'); break; }
-                    const pathToChange = resolvePath(args[0]);
-                    const nodeToChange = getNode(pathToChange);
-                    if (nodeToChange && nodeToChange.type === 'directory') {
-                        if (nodeToChange.protected > accessLevel) {
-                            errorSound();
-                            appendToTerminal(`Erreur: Accès refusé à '${pathToChange}'. Niveau ${nodeToChange.protected} requis.`, 'error');
-                        } else if (!hasPermissions(nodeToChange, 'x')) { 
-                             errorSound();
-                             appendToTerminal(`Erreur: Permission d'exécution refusée pour '${pathToChange}'.`, 'error');
-                        } else {
-                            currentDirectory = pathToChange;
-                            updatePrompt();
-                        }
-                    } else {
-                        errorSound();
-                        appendToTerminal(`Erreur: Répertoire non trouvé '${args[0]}'`, 'error');
-                    }
-                    break;
-                case 'cat':
-                    if (!args[0]) { appendToTerminal("Usage: cat <fichier>", 'info'); break; }
-                    const filePath = resolvePath(args[0], currentDirectory).slice(0,-1); 
-                    const fileNode = getNode(filePath);
-
-                    if (fileNode && fileNode.type === 'file') {
-                        if (fileNode.protected > accessLevel) {
-                            errorSound();
-                            appendToTerminal(`Erreur: Accès refusé à '${filePath}'. Niveau ${fileNode.protected} requis.`, 'error');
-                        } else if (!hasPermissions(fileNode, 'r')) {
-                            errorSound();
-                            appendToTerminal(`Erreur: Permission de lecture refusée pour '${filePath}'.`, 'error');
-                        } else if (fileNode.encrypted) {
-                            const password = await promptPassword(`Mot de passe pour ${args[0]}:`);
-                            if (password === fileNode.password) {
-                                successSound();
-                                appendToTerminal(`Contenu de <span class="filename">${args[0]}</span> (déchiffré):`, 'info', true);
-                                appendToTerminal(fileNode.content.join('\n'));
-                            } else {
-                                errorSound();
-                                appendToTerminal("Mot de passe incorrect.", 'error');
-                            }
-                        } else {
-                            appendToTerminal(`Contenu de <span class="filename">${args[0]}</span>:`, 'info', true);
-                            appendToTerminal(fileNode.content.join('\n'));
-                        }
-                    } else if (fileNode && (fileNode.type === 'binary' || fileNode.type === 'image' || fileNode.type === 'audio')) {
-                        appendToTerminal(`'${args[0]}' est un fichier ${fileNode.type}. Utilisez 'view' pour les images, 'play' pour l'audio, ou exécutez les binaires.`, 'warning');
-                    } else {
-                        errorSound();
-                        appendToTerminal(`Erreur: Fichier non trouvé ou n'est pas un fichier texte '${args[0]}'`, 'error');
-                    }
-                    break;
-                case 'view': 
-                    if (!args[0]) { appendToTerminal("Usage: view <fichier_image>", 'info'); break; }
-                    const imagePath = resolvePath(args[0], currentDirectory).slice(0,-1);
-                    const imageNode = getNode(imagePath);
-                    if (imageNode && imageNode.type === 'image') {
-                        if (imageNode.protected > accessLevel) {
-                            errorSound(); appendToTerminal(`Accès refusé. Niveau ${imageNode.protected} requis.`, 'error'); break;
-                        }
-                        if (imageNode.password) {
-                            const imgPassword = await promptPassword(`Mot de passe pour ${args[0]}:`);
-                            if (imgPassword !== imageNode.password) {
-                                errorSound(); appendToTerminal("Mot de passe incorrect.", 'error'); break;
-                            }
-                            successSound();
-                        }
-                        windowManager.createWindow(`image-viewer-${Date.now()}`, `Image: ${args[0]}`, (contentDiv) => {
-                            contentDiv.classList.add('image-viewer-content');
-                            if (imageNode.url) {
-                                const img = document.createElement('img');
-                                img.src = imageNode.url;
-                                img.alt = imageNode.description || args[0];
-                                contentDiv.appendChild(img);
-                            } else if (imageNode.ascii) { 
-                                const pre = document.createElement('pre');
-                                pre.className = 'ascii-art';
-                                pre.textContent = imageNode.ascii.join('\n');
-                                contentDiv.appendChild(pre);
-                            }
-                            appendToTerminal(imageNode.description || `Affichage de ${args[0]}.`, 'info');
-                        }, { width: '500px', height: 'auto' });
-                    } else {
-                        errorSound(); appendToTerminal(`'${args[0]}' n'est pas un fichier image visualisable.`, 'error');
-                    }
-                    break;
-                case 'play': 
-                     if (!args[0]) { appendToTerminal("Usage: play <fichier_audio>", 'info'); break; }
-                    const audioPath = resolvePath(args[0], currentDirectory).slice(0,-1);
-                    const audioNode = getNode(audioPath);
-                    if (audioNode && audioNode.type === 'audio') {
-                        if (audioNode.protected > accessLevel) {
-                            errorSound(); appendToTerminal(`Accès refusé. Niveau ${audioNode.protected} requis.`, 'error'); break;
-                        }
-                         if (audioNode.soundEffect && typeof audioNode.soundEffect === 'function') {
-                            audioNode.soundEffect();
-                            appendToTerminal(audioNode.description || `Lecture de ${args[0]}...`, 'info');
-                        } else {
-                            appendToTerminal(`Aucun effet sonore défini pour ${args[0]}.`, 'warning');
-                        }
-                    } else {
-                        errorSound(); appendToTerminal(`'${args[0]}' n'est pas un fichier audio jouable.`, 'error');
-                    }
-                    break;
-                case 'pwd': appendToTerminal(currentDirectory); break;
-                case 'whoami': appendToTerminal(currentUser); break;
-                case 'accesslevel': appendToTerminal(`Niveau d'accès actuel: ${accessLevel} (${getUserRole(accessLevel)})`, 'info'); break;
-                case 'clear': terminalOutput.innerHTML = ''; break;
-                case 'exit': /* ... */ break;
-                case 'sudo': /* ... */ break;
-                case 'music':
-                    if (args[0] === 'on') { startBackgroundMusic(); } 
-                    else if (args[0] === 'off') { stopBackgroundMusic(); } 
-                    else { appendToTerminal("Usage: music [on|off]", 'info'); }
-                    break;
-                case 'setmusic':
-                    if (args[0]) {
-                        // Pour cette démo, on ne change pas la variable globale, on essaie de jouer la nouvelle URL
-                        appendToTerminal(`Tentative de chargement de la musique depuis : ${args[0]}`, 'info');
-                        if (backgroundMusicPlayer || backgroundMusic) stopBackgroundMusic();
-                        const tempPlayer = new Tone.Player({ url: args[0], loop: true, volume: -10 }).toDestination();
-                        Tone.loaded().then(() => { tempPlayer.start(); backgroundMusicPlayer = tempPlayer; Tone.Transport.start(); appendToTerminal("Nouvelle musique démarrée.", 'success'); }).catch(err => { appendToTerminal("Erreur chargement: " + err, 'error'); });
-                    } else { appendToTerminal("Usage: setmusic <url>", 'info'); }
-                    break;
-                case '': break; 
-                default:
-                    errorSound();
-                    appendToTerminal(`Commande inconnue: '${command}'. Tapez 'help'.`, 'error');
-            }
-        }
-        function getUserRole(level) { /* ... */ return 'Role';}
-        function hasPermissions(node, permType) { /* ... */ return true; }
-        async function promptPassword(message) { /* ... */ return 'password'; }
-        function triggerScreamer(imageUrl, duration = 2000) { /* ... */ }
-        function updateStatusBar() { /* ... */ }
-        async function runBootSequence() { /* ... */ 
-            setTimeout(() => {
-                bootScreen.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out'; 
-                bootScreen.style.opacity = '0';
-                bootScreen.style.transform = 'scale(1.2)'; 
-                setTimeout(() => {
-                    bootScreen.style.display = 'none';
-                    desktop.style.display = 'grid'; 
-                    windowManager = new WindowManager('desktop');
-                    const terminalWindow = windowManager.createWindow('main-terminal', 'NyxNet Secure Shell (NSS)', (contentDiv, windowElement) => {
-                        contentDiv.innerHTML = `
-                            <div id="terminal-output" style="height: calc(100% - 40px); overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word;"></div>
-                            <div class="prompt-line p-1 border-t border-gray-700/50" style="height: 30px;">
-                                <span id="prompt" class="prompt"></span>
-                                <input type="text" id="terminal-input" class="terminal-input" autofocus placeholder="Entrez votre commande...">
-                            </div>
-                        `;
-                        terminalOutput = contentDiv.querySelector('#terminal-output');
-                        terminalInput = contentDiv.querySelector('#terminal-input');
-                        promptElement = contentDiv.querySelector('#prompt');
+                        }, { width: '60vw', height: '65vh', left: '50px', top: '50px' }); 
                         
-                        appendToTerminal("NyxOS v1.0 'Digital Veil' initialisé.", 'info');
-                        appendToTerminal("Tapez 'cat /readme.txt' ou 'help' pour commencer.", 'info');
-                        updatePrompt();
-
-                        terminalInput.addEventListener('keydown', (e) => {
-                            if (e.key === 'Enter') {
-                                e.preventDefault();
-                                const command = terminalInput.value;
-                                if (command.trim() !== "") commandHistory.unshift(command);
-                                historyIndex = -1;
-                                handleCommand(command);
-                                terminalInput.value = '';
-                            } else if (e.key === 'ArrowUp') {
-                                e.preventDefault();
-                                if (commandHistory.length > 0) {
-                                    historyIndex = Math.min(historyIndex + 1, commandHistory.length - 1);
-                                    terminalInput.value = commandHistory[historyIndex];
+                        if (terminalWindow && terminalInput) {
+                            terminalWindow.addEventListener('click', (e) => {
+                                if (!e.target.closest('.window-header')) {
+                                    if(terminalInput) terminalInput.focus();
                                 }
-                            } else if (e.key === 'ArrowDown') {
-                                e.preventDefault();
-                                if (commandHistory.length > 0) {
-                                    historyIndex = Math.max(historyIndex - 1, -1);
-                                    terminalInput.value = (historyIndex === -1) ? '' : commandHistory[historyIndex];
+                            });
+                        }
+                        
+                        // Start widget updates AFTER desktop is visible and terminal is created
+                        setInterval(() => {
+                            if (uptimeEl) uptimeEl.textContent = new Date(performance.now()).toISOString().substr(11, 8);
+                            if (pktInEl) pktInEl.textContent = (parseInt(pktInEl.textContent || '1337') + Math.floor(Math.random() * 50)).toString();
+                            if (pktOutEl) pktOutEl.textContent = (parseInt(pktOutEl.textContent || '8008') + Math.floor(Math.random() * 10)).toString();
+                            if (accessWidgetEl) accessWidgetEl.textContent = getUserRole(accessLevel);
+                            
+                            if (oracleWidgetEl) {
+                                const sigStrength = Math.random();
+                                if (sigStrength < 0.3) {
+                                    oracleWidgetEl.textContent = "FORT";
+                                    oracleWidgetEl.className = 'text-red-500'; 
+                                } else if (sigStrength < 0.7) {
+                                    oracleWidgetEl.textContent = "MOYEN";
+                                    oracleWidgetEl.className = 'text-yellow-400';
+                                } else {
+                                    oracleWidgetEl.textContent = "FAIBLE";
+                                    oracleWidgetEl.className = 'text-green-400';
                                 }
-                            } else if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete") { 
-                                keyClickSound(); 
                             }
-                        });
-                    }, { width: '60vw', height: '65vh', left: '50px', top: '50px' }); // Positionnement initial
-                    
-                    if (terminalWindow && terminalInput) {
-                        terminalWindow.addEventListener('click', (e) => {
-                            if (!e.target.closest('.window-header')) {
-                                if(terminalInput) terminalInput.focus();
-                            }
-                        });
-                    }
-                    setInterval(updateStatusBar, 1500); // Update status bar every 1.5 second
-                }, 500); 
-            }, 500);
-        }
 
-        document.body.addEventListener('click', async () => {
-            if (Tone.context.state !== 'running') {
-                await Tone.start();
-                console.log("AudioContext démarré par interaction utilisateur.");
+                            if (currentTimeFooterEl) {
+                                 const now = new Date();
+                                currentTimeFooterEl.textContent = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}`;
+                            }
+                            
+                            document.querySelectorAll('#cpu-graph .graph-bar, #net-graph .graph-bar').forEach(bar => {
+                               bar.style.left = `${Math.random() * 95}%`;
+                               bar.style.height = `${Math.random() * 80 + 10}%`;
+                               bar.style.background = Math.random() > 0.7 ? 'var(--secondary-color)' : 'var(--primary-color)';
+                            });
+                        }, 1500);
+
+                    }, 500); 
+                }, 500);
             }
-        }, { once: true });
-
-        window.onload = () => {
+            
             runBootSequence();
-            // Start updating widgets once DOM is loaded
-            setInterval(() => {
-                document.getElementById('uptime').textContent = new Date(performance.now()).toISOString().substr(11, 8);
-                document.getElementById('pkt-in').textContent = parseInt(document.getElementById('pkt-in').textContent) + Math.floor(Math.random() * 50);
-                document.getElementById('pkt-out').textContent = parseInt(document.getElementById('pkt-out').textContent) + Math.floor(Math.random() * 10);
-                document.getElementById('access-widget').textContent = getUserRole(accessLevel);
-                document.getElementById('oracle-widget').textContent = document.getElementById('oracle-sig').textContent;
-                document.getElementById('oracle-widget').className = document.getElementById('oracle-sig').className;
-                
-                // Animate graph bars
-                document.querySelectorAll('.graph-bar').forEach(bar => {
-                   bar.style.left = `${Math.random() * 95}%`;
-                   bar.style.height = `${Math.random() * 80 + 10}%`;
-                   bar.style.background = Math.random() > 0.7 ? 'var(--secondary-color)' : 'var(--primary-color)';
-                });
-            }, 1500);
-             // Initial graph bars
-            const cpuGraph = document.getElementById('cpu-graph');
-            const netGraph = document.getElementById('net-graph');
-            for(let i=0; i<20; i++) {
-                const bar1 = document.createElement('div'); bar1.className = 'graph-bar'; cpuGraph.appendChild(bar1);
-                const bar2 = document.createElement('div'); bar2.className = 'graph-bar'; netGraph.appendChild(bar2);
+
+            // Initial graph bars
+            if (cpuGraphEl && netGraphEl) { 
+                for(let i=0; i<20; i++) {
+                    const bar1 = document.createElement('div'); bar1.className = 'graph-bar'; cpuGraphEl.appendChild(bar1);
+                    const bar2 = document.createElement('div'); bar2.className = 'graph-bar'; netGraphEl.appendChild(bar2);
+                }
             }
-        };
+            
+            document.body.addEventListener('click', async () => { 
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                    console.log("AudioContext démarré par interaction utilisateur.");
+                }
+            }, { once: true });
 
-
+        }; // Fin de window.onload
     </script>
 </body>
 </html>
