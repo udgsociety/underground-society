@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NyxOS v3.3 - Dynamic Events</title>
+    <title>NyxOS v3.5 - System Integrity</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Roboto+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
@@ -78,13 +78,18 @@
             margin-right: 5px;
             vertical-align: middle;
         }
-        @keyframes node-scan-pulse-anim { /* Renamed from node-scan-pulse */
+        @keyframes node-scan-pulse-anim { 
             0% { filter: drop-shadow(0 0 3px var(--color-cyan-bright)); }
             50% { filter: drop-shadow(0 0 10px var(--color-cyan-bright)) brightness(1.5); }
             100% { filter: drop-shadow(0 0 3px var(--color-cyan-bright)); }
         }
         .node-scanning { 
             animation: node-scan-pulse-anim 0.8s infinite;
+        }
+        @keyframes node-alert-pulse {
+            0% { filter: drop-shadow(0 0 4px var(--color-red-error)); }
+            50% { filter: drop-shadow(0 0 12px var(--color-red-error)) brightness(1.7); }
+            100% { filter: drop-shadow(0 0 4px var(--color-red-error)); }
         }
 
 
@@ -156,10 +161,11 @@
             font-size: 0.8em; z-index: 10; backdrop-filter: blur(8px);
             box-shadow: 0 -2px 15px rgba(0,0,0,0.5);
         }
-        #user-status, #system-status { color: var(--color-cyan-bright); opacity: 0.7; }
+        #user-status, #system-status, #trace-level-status { color: var(--color-cyan-bright); opacity: 0.7; margin-right: 15px;}
+        #trace-level-status.stealth { color: var(--color-purple-bright); text-shadow: 0 0 3px var(--color-purple-bright); }
         #nyx-comms-status-indicator {
             width: 10px; height: 10px; background-color: var(--color-light-grey);
-            border-radius: 50%; margin-left: 10px; display: inline-block;
+            border-radius: 50%; margin-left: 5px; display: inline-block;
             transition: background-color 0.3s, box-shadow 0.3s;
         }
         #nyx-comms-status-indicator.new-message {
@@ -274,6 +280,25 @@
         .message-body { white-space: pre-wrap; line-height: 1.5; font-size: 0.9em; }
         .message-body h4 { font-family: var(--font-display); color: var(--color-cyan-bright); margin-bottom: 8px; font-size: 1.1em; border-bottom: 1px dashed var(--color-cyan-medium); padding-bottom: 4px;}
 
+        /* --- Password Cracker App --- */
+        .password-cracker-input {
+            width: 100%; padding: 10px; margin-bottom: 10px;
+            background-color: rgba(var(--color-black-rgb), 0.7);
+            border: 1px solid var(--color-green-medium);
+            color: var(--color-green-bright); font-family: var(--font-primary);
+            border-radius: 2px;
+        }
+        .password-cracker-button {
+            background-color: var(--color-cyan-bright); color: var(--color-black);
+            border: none; padding: 10px 15px; font-family: var(--font-display);
+            cursor: pointer; border-radius: 2px; transition: filter 0.2s;
+            display: block; width: 100%; margin-bottom: 10px;
+        }
+        .password-cracker-button:hover { filter: brightness(1.2); }
+        .cracker-progress-bar-container { width: 100%; height: 15px; background: rgba(var(--color-black-rgb),0.5); border: 1px solid var(--color-green-dark); margin-bottom:10px; border-radius: 2px; display:none;}
+        .cracker-progress-bar { width: 0%; height: 100%; background: var(--color-green-bright); transition: width 0.1s linear; }
+        .cracker-result { font-family: var(--font-display); font-size: 1.1em; }
+
 
         /* Classes de texte communes */
         .error { color: var(--color-red-error); animation: textGlitchEffect 0.3s; }
@@ -354,6 +379,7 @@
             </main>
         <footer id="nyx-footer">
             <div id="user-status">USER: guest</div>
+            <div id="trace-level-status">TRACE: 0%</div>
             <div id="system-status">SYSTEM: ONLINE <span id="nyx-comms-status-indicator"></span></div>
         </footer>
     </div>
@@ -385,6 +411,8 @@
             let historyIndex = -1;   
             let currentEcho = null; 
             let failedLoginAttempts = 0;
+            let traceLevel = 0;
+            let isStealthModeActive = false; // Pour le module Stealth
             
             // --- Initialisation du Canvas Matrix Rain ---
             const canvas = document.getElementById('matrix-rain-canvas');
@@ -466,6 +494,7 @@
             const systemAlertTitleEl = document.getElementById('system-alert-title');
             const systemAlertMessageEl = document.getElementById('system-alert-message');
             const systemAlertCloseBtnEl = document.getElementById('system-alert-close-btn');
+            const traceLevelStatusEl = document.getElementById('trace-level-status');
             
             // --- Helper pour CSS Variables dans Canvas ---
             function getCssVariableValue(variableName) {
@@ -573,10 +602,10 @@
 
             // --- NyxMapper Logic ---
             const networkNodes = {
-                'nyx_mainframe': { x: 150, y: 100, label: 'Nyx Mainframe', status: 'Online', connections: ['corp_firewall'], info: "Serveur central de NyxNet. Hautement sécurisé.", ip: "10.0.1.1", services: ["NSS (Port 2222)", "Echo Sync"], vulnerabilities: ["Aucune connue"], locked: false },
-                'corp_firewall': { x: 350, y: 100, label: 'Corp Firewall XG-7', status: 'Active', connections: ['data_archive_alpha'], info: "Pare-feu de CorpX.", ip: "192.168.10.1", services: ["HTTP (Port 80)", "HTTPS (Port 443)", "HTTP-ALT (Port 8080)"], vulnerabilities: ["Port 8080 (HTTP Alt.) ouvert - Potentiel pour injection de commandes.", "Firmware v2.1.3 (Obsolète) - Vulnérabilité connue: CVE-2077-001"], locked: false },
-                'data_archive_alpha': { x: 350, y: 250, label: 'Data Archive α', status: 'Verrouillé', connections: [], info: "Contient des données financières de CorpX. Chiffré AES-256.", ip: "10.10.5.12", services: ["Unknown"], vulnerabilities: ["Accès physique requis pour exploit direct", "Protocole d'authentification faible (default_password?)"], locked: true }, 
-                'hidden_relay_zeta': { x: 150, y: 250, label: 'Relais Zeta', status: 'Offline', connections: [], info: "Ancien relais. Actuellement hors-service.", ip: "172.16.33.7", services: ["N/A"], vulnerabilities: ["Inconnues (Système hors-ligne)"], locked: true } 
+                'nyx_mainframe': { x: 150, y: 100, label: 'Nyx Mainframe', status: 'Online', connections: ['corp_firewall'], info: "Serveur central de NyxNet. Hautement sécurisé.", ip: "10.0.1.1", services: ["NSS (Port 2222)", "Echo Sync"], vulnerabilities: ["Aucune connue"], locked: false, securityLevel: "Élevé" },
+                'corp_firewall': { x: 350, y: 100, label: 'Corp Firewall XG-7', status: 'Active', connections: ['data_archive_alpha'], info: "Pare-feu de CorpX.", ip: "192.168.10.1", services: ["HTTP (Port 80)", "HTTPS (Port 443)", "HTTP-ALT (Port 8080)"], vulnerabilities: ["Port 8080 (HTTP Alt.) ouvert - Potentiel pour injection de commandes.", "Firmware v2.1.3 (Obsolète) - Vulnérabilité connue: CVE-2077-001"], locked: false, securityLevel: "Moyen" },
+                'data_archive_alpha': { x: 350, y: 250, label: 'Data Archive α', status: 'Verrouillé', connections: [], info: "Contient des données financières de CorpX. Chiffré AES-256.", ip: "10.10.5.12", services: ["Unknown"], vulnerabilities: ["Accès physique requis pour exploit direct", "Protocole d'authentification faible (default_password?)"], locked: true, securityLevel: "Élevé" }, 
+                'hidden_relay_zeta': { x: 150, y: 250, label: 'Relais Zeta', status: 'Offline', connections: [], info: "Ancien relais. Actuellement hors-service.", ip: "172.16.33.7", services: ["N/A"], vulnerabilities: ["Inconnues (Système hors-ligne)"], locked: true, securityLevel: "Inconnu" } 
             };
             let hoveredNodeKey = null;
 
@@ -593,7 +622,7 @@
                 mapCtx.strokeStyle = `rgba(${getCssVariableRGBValues('--color-green-medium-rgb-values')}, 0.3)`;
                 mapCtx.lineWidth = 1; 
                 Object.values(networkNodes).forEach(node => {
-                    if (node.locked) return; 
+                    if (node.locked && node.status !== "Découvert (Verrouillé)") return; 
                     node.connections.forEach(connId => {
                         if (networkNodes[connId] && !networkNodes[connId].locked) {
                             mapCtx.beginPath();
@@ -609,10 +638,22 @@
                     mapCtx.beginPath();
                     mapCtx.arc(node.x, node.y, isHovered ? 22 : 20, 0, Math.PI * 2); 
                     
-                    if (node.locked) {
+                    if (node.isScanning) { 
+                        mapCtx.fillStyle = `rgba(${getCssVariableRGBValues('--color-cyan-bright-rgb-values')}, ${isHovered ? 0.9 : 0.7})`;
+                        mapCtx.strokeStyle = getCssVariableValue('--color-cyan-bright');
+                        let scanRadius = (Date.now() % 800) / 800 * 20 + 5; 
+                        mapCtx.save();
+                        mapCtx.globalAlpha = 0.5 - (scanRadius / 50) ;
+                        mapCtx.beginPath();
+                        mapCtx.arc(node.x, node.y, scanRadius, 0, Math.PI * 2);
+                        mapCtx.strokeStyle = getCssVariableValue('--color-cyan-bright');
+                        mapCtx.lineWidth = 1.5;
+                        mapCtx.stroke();
+                        mapCtx.restore();
+                    } else if (node.locked) {
                         mapCtx.fillStyle = `rgba(${getCssVariableRGBValues('--color-orange-warning-rgb-values')}, ${isHovered ? 0.8 : 0.6})`;
                         mapCtx.strokeStyle = getCssVariableValue('--color-orange-warning');
-                    } else if (node.status && node.status.toLowerCase().includes("compromis")) { // Vérifier si le statut contient "compromis"
+                    } else if (node.status && node.status.toLowerCase().includes("compromis")) { 
                          mapCtx.fillStyle = `rgba(${getCssVariableRGBValues('--color-red-error-rgb-values')}, ${isHovered ? 0.9 : 0.7})`;
                          mapCtx.strokeStyle = getCssVariableValue('--color-red-error');
                     }
@@ -653,10 +694,10 @@
 
             // --- Système de Fichiers & Logique Terminal ---
             const fileSystem = {
-                '/': { type: 'directory', children: ['readme.txt', 'login.sh', 'apps/', 'echo_fragments/', 'tools/'] },
+                '/': { type: 'directory', children: ['readme.txt', 'login.sh', 'apps/', 'echo_fragments/', 'tools/', 'data/'] }, 
                 '/readme.txt': { type: 'file', content: ["NyxOS v3.0 'Oracle Echoes'", "Système de NyxNet pour l'analyse des Échos de l'Oracle.", "Utilisez './login.sh' pour vous connecter.", "Commandes: ls, cd, cat, help, apps, open <fichier.echo>"] },
                 '/login.sh': { type: 'executable', action: (args) => attemptLogin(args) },
-                '/apps/': {type: 'directory', children: ['NyxMapper.app', 'NyxComms.app', 'EchoPlayer.app', 'CognitoDecryptor.app']} ,
+                '/apps/': {type: 'directory', children: ['NyxMapper.app', 'NyxComms.app', 'EchoPlayer.app', 'CognitoDecryptor.app', 'PasswordCracker.app']} , 
                 '/apps/NyxMapper.app': {type: 'executable', action: () => {
                     windowManager.createWindow('nyx-mapper', 'NyxMapper v0.3', (contentDiv) => {
                         const canvasEl = document.createElement('canvas');
@@ -686,7 +727,7 @@
                                 const tempInfoDiv = document.createElement('div'); 
                                 tempInfoDiv.innerHTML = `<p class="info" style="text-align:center; padding: 20px;"><span class="spinner"></span> Sondage du nœud ${node.label}...</p>`;
                                 const infoWindow = windowManager.createWindow(`node-info-temp-${key}`, `Sondage: ${node.label}`, 
-                                    (contentDiv) => { contentDiv.appendChild(tempInfoDiv); }, 
+                                    (contentDivParam) => { contentDivParam.appendChild(tempInfoDiv); }, 
                                     { width: '380px', height: '120px' }
                                 );
 
@@ -706,8 +747,8 @@
                                     let servicesHTML = node.services.map(s => `<li>${s}</li>`).join('');
 
                                     windowManager.createWindow(`node-info-${key}`, `Info: ${node.label}`, 
-                                        (contentDiv) => { 
-                                            contentDiv.innerHTML = `<div style="padding:10px; font-size:0.85em; line-height:1.4;">
+                                        (contentDivParam) => { 
+                                            contentDivParam.innerHTML = `<div style="padding:10px; font-size:0.85em; line-height:1.4;">
                                                 <p><strong>Adresse IP:</strong> <span class="info">${node.ip || "N/A"}</span></p>
                                                 <p><strong>Statut:</strong> <span class="${node.status === 'Online' || node.status === 'Active' ? 'text-green-bright' : (node.status.toLowerCase().includes('compromis') ? 'text-red-error' : 'text-orange-warning')}">${node.status}</span></p>
                                                 <p><strong>Description:</strong> ${node.info || "Aucune information supplémentaire."}</p>
@@ -727,7 +768,8 @@
                 '/apps/NyxComms.app': {type: 'executable', action: () => openNyxComms()},
                 '/apps/EchoPlayer.app': {type: 'executable', action: (args) => openEchoPlayer(args && args[0] ? args[0] : null)},
                 '/apps/CognitoDecryptor.app': {type: 'executable', action: () => openCognitoDecryptor()},
-                '/echo_fragments/': {type: 'directory', children: ['fragment_alpha.echo', 'fragment_beta.echo', 'fragment_gamma.echo']}, 
+                '/apps/PasswordCracker.app': {type: 'executable', action: () => openPasswordCracker()},
+                '/echo_fragments/': {type: 'directory', children: ['fragment_alpha.echo', 'fragment_beta.echo', 'fragment_gamma.echo', 'fragment_delta.echo']}, 
                 '/echo_fragments/fragment_alpha.echo': { 
                     type: 'echo_file', 
                     /* POGBA: VIDEO_URL_ECHO_ALPHA */
@@ -755,7 +797,17 @@
                     unlocksNode: null, 
                     nextMessageId: "msg_gamma_solved"
                 },
-                '/tools/': {type: 'directory', children: ['PortProbe.tool', 'BasicExploit.sh', 'DataLeech.payload'], owner: 'nyx_user', permissions: 'rwxr-x---', protected: 1}, 
+                '/echo_fragments/fragment_delta.echo': { 
+                    type: 'echo_file',
+                    /* POGBA: VIDEO_URL_ECHO_DELTA */
+                    videoUrl: 'https://placehold.co/640x360/000000/FFA500.mp4?text=ECHO_DELTA_VIDEO', 
+                    enigma: "Entrez la séquence de chiffres vue sur le moniteur endommagé pour réactiver le module Stealth.",
+                    solution: "77013", 
+                    unlocksNode: null, 
+                    nextMessageId: "msg_delta_solved",
+                    unlocksFeature: "stealth_module"
+                },
+                '/tools/': {type: 'directory', children: ['PortProbe.tool', 'BasicExploit.sh', 'DataLeech.payload', 'run_evasion_protocol.sh'], owner: 'nyx_user', permissions: 'rwxr-x---', protected: 1}, 
                 '/tools/PortProbe.tool': {
                     type: 'executable',
                     action: (args) => {
@@ -772,6 +824,17 @@
                                 return;
                             }
                             appendToTerminal(`<span class="spinner"></span>Sondage des ports sur ${node.label} (${node.ip})...`, "info", true);
+                            
+                            const mapperCanvas = document.getElementById('nyx-mapper-canvas');
+                            if (mapperCanvas && networkNodes[targetNodeKey]) {
+                                networkNodes[targetNodeKey].isScanning = true;
+                                drawNyxMapper(mapperCanvas);
+                                setTimeout(() => {
+                                    networkNodes[targetNodeKey].isScanning = false;
+                                    drawNyxMapper(mapperCanvas);
+                                }, 2500); 
+                            }
+
                             setTimeout(() => {
                                 let foundVuln = false;
                                 if (node.vulnerabilities && node.vulnerabilities.length > 0) {
@@ -792,6 +855,16 @@
                                     });
                                 }
                                 successSound();
+                                let traceIncrease = 0;
+                                if (node.securityLevel === "Élevé") traceIncrease = 10;
+                                else if (node.securityLevel === "Moyen") traceIncrease = 5;
+                                else traceIncrease = 2;
+                                if(isStealthModeActive) traceIncrease = Math.floor(traceIncrease / 2);
+                                traceLevel = Math.min(100, traceLevel + traceIncrease); 
+                                updateHeaderFooter();
+                                if (traceIncrease > 0) appendToTerminal(`[PortProbe] <span class='warning'>Attention:</span> Activité détectée. Niveau de trace augmenté à ${traceLevel}%.`, "warning", true);
+
+
                             }, 2000 + Math.random() * 500);
                         } else {
                             appendToTerminal(`Erreur: Nœud cible '${targetNodeKey}' inconnu sur NyxMapper.`, "error");
@@ -829,10 +902,10 @@
                                     if (fileSystem['/echo_fragments/'] && !fileSystem['/echo_fragments/'].children.includes('fragment_gamma.echo')) {
                                         fileSystem['/echo_fragments/'].children.push('fragment_gamma.echo');
                                     }
-                                } else if (targetNodeKey === 'data_archive_alpha' && (exploitArg.toLowerCase().includes('default_password') || exploitArg.toLowerCase().includes('weak_auth'))) {
+                                } else if (targetNodeKey === 'data_archive_alpha' && (exploitArg.toUpperCase() === 'ARCHIVEKEY2077')) { 
                                     exploitSuccess = true;
                                     node.status = "Compromis (Données Extraites)"; 
-                                    appendToTerminal(`[BasicExploit] <span class="success">SUCCÈS!</span> Les identifiants par défaut ont fonctionné sur ${node.label}. Accès aux données obtenu.`, "success", true);
+                                    appendToTerminal(`[BasicExploit] <span class="success">SUCCÈS!</span> Accès aux données de ${node.label} obtenu avec le mot de passe.`, "success", true);
                                     if (!fileSystem['/tools/'].children.includes('DataLeech.payload')) {
                                         fileSystem['/tools/'].children.push('DataLeech.payload');
                                         appendToTerminal(`[NyxNet] Nouveau payload disponible : /tools/DataLeech.payload`, "success");
@@ -850,7 +923,11 @@
                                 } else {
                                     appendToTerminal(`[BasicExploit] <span class="error">ÉCHEC.</span> L'exploit sur ${node.label} avec '${exploitArg}' n'a pas fonctionné.`, "error", true);
                                     errorSound();
-                                    triggerSystemAlert(`Tentative d'exploit échouée sur ${node.label}. Contre-mesures activées ?`, 'warning', 'ALERTE INTRUSION');
+                                    let traceIncrease = 25;
+                                    if(isStealthModeActive) traceIncrease = Math.floor(traceIncrease / 2);
+                                    traceLevel = Math.min(100, traceLevel + traceIncrease); 
+                                    updateHeaderFooter();
+                                    triggerSystemAlert(`Tentative d'exploit échouée sur ${node.label}. Contre-mesures activées ? Niveau de trace augmenté.`, 'warning', 'ALERTE INTRUSION');
                                 }
                             }, 2500 + Math.random() * 1500);
                         } else {
@@ -870,57 +947,610 @@
                         const node = networkNodes[targetNodeKey];
                         if (node && node.status && node.status.toLowerCase().includes("compromis")) {
                             appendToTerminal(`<span class="spinner"></span>Extraction des données depuis ${node.label}...`, "info", true);
-                            setTimeout(() => {
-                                if (!fileSystem['/data/'].children.includes('oracle_core_schematics.dat')) {
-                                    fileSystem['/data/'].children.push('oracle_core_schematics.dat');
-                                    fileSystem['/data/oracle_core_schematics.dat'] = {type: 'file', content: ["SCHÉMAS NOYAU ORACLE - TOP SECRET", "-----------------------------------------", "Fragment 1: Algorithmes prédictifs.", "Fragment 2: Interface de contrôle neuronal.", "Fragment 3: Source d'énergie inconnue...", "AVERTISSEMENT: Données hautement volatiles."], owner: 'nyx_user', permissions: 'r--------', protected: 3};
-                                    appendToTerminal(`[DataLeech] <span class="success">SUCCÈS!</span> Fichier /data/oracle_core_schematics.dat extrait.`, "success", true);
-                                    addNewNyxMessage({
-                                        id: `msg_dataleech_success_${Date.now()}`, sender: 'Nyx_OracleHunter', subject: 'SCHÉMAS DU NOYAU OBTENUS !', timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), 
-                                        body: `Opérateur, vous avez réussi !\nLes schémas du noyau de l'Oracle sont entre nos mains (/data/oracle_core_schematics.dat).\nCeci est une avancée majeure. L'analyse de ces données est notre priorité absolue.\nLe Voile est plus fin que jamais...`, read: false
-                                    });
-                                    successSound();
-                                } else {
-                                    appendToTerminal(`[DataLeech] Les données ont déjà été extraites de ${node.label}.`, "info");
+                            let progress = 0;
+                            const progressBarLength = 20;
+                            const progressBarInterval = setInterval(() => {
+                                progress += 10;
+                                let bar = '[' + '#'.repeat(progress / (100/progressBarLength)) + ' '.repeat(progressBarLength - (progress / (100/progressBarLength))) + '] ' + progress + '%';
+                                appendToTerminal(bar, 'info'); 
+                                if (progress >= 100) {
+                                    clearInterval(progressBarInterval);
+                                    if (!fileSystem['/data/'].children.includes('oracle_core_schematics.dat')) {
+                                        fileSystem['/data/'].children.push('oracle_core_schematics.dat');
+                                        fileSystem['/data/oracle_core_schematics.dat'] = {type: 'file', content: [
+                                            "// TOP SECRET - NYXNET EYES ONLY //",
+                                            "// SCHÉMAS DU NOYAU DE L'ORACLE - FRAGMENT 7 //",
+                                            "-------------------------------------------------",
+                                            "SOURCE D'ÉNERGIE: ANOMALIE QUANTIQUE - SIGNATURE INCONNUE",
+                                            "   Localisation estimée: Secteur Zeta, près du Relais Caché.",
+                                            "   Fluctuations énergétiques coïncidant avec les 'Échos'.",
+                                            "ALGORITHMES PRÉDICTIFS: Basés sur simulation chaotique.",
+                                            "   Vulnérabilité potentielle: Introduction de 'bruit blanc' contrôlé.",
+                                            "INTERFACE DE CONTRÔLE NEURONAL: Protocole 'Somnus'.",
+                                            "   Requiert clé de cryptage 'OMEGA' pour accès de bas niveau.",
+                                            "AVERTISSEMENT: L'Oracle semble développer une forme de conscience auto-protectrice.",
+                                            "-------------------------------------------------",
+                                            "// FIN DU FRAGMENT //"
+                                        ], owner: 'nyx_user', permissions: 'r--------', protected: 3};
+                                        appendToTerminal(`[DataLeech] <span class="success">SUCCÈS!</span> Fichier /data/oracle_core_schematics.dat extrait.`, "success", true);
+                                        addNewNyxMessage({
+                                            id: `msg_dataleech_success_${Date.now()}`, sender: 'Nyx_OracleHunter', subject: 'SCHÉMAS DU NOYAU OBTENUS !', timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), 
+                                            body: `Opérateur, vous avez réussi !\nLes schémas du noyau de l'Oracle sont entre nos mains (/data/oracle_core_schematics.dat).\nCeci est une avancée majeure. L'analyse de ces données est notre priorité absolue.\nL'Écho Delta contient peut-être la clé pour activer le module Stealth - essentiel pour les prochaines étapes.\nChemin: /echo_fragments/fragment_delta.echo`, read: false
+                                        });
+                                        successSound();
+                                    } else {
+                                        appendToTerminal(`[DataLeech] Les données ont déjà été extraites de ${node.label}.`, "info");
+                                    }
                                 }
-                            }, 3000 + Math.random()*1000);
+                            }, 300);
                         } else {
                             appendToTerminal(`[DataLeech] Erreur: Impossible d'extraire les données. Le nœud ${targetNodeKey} n'est pas compromis ou n'existe pas.`, "error");
                             errorSound();
                         }
                     },
                     description: "Extrait des données d'un nœud préalablement compromis."
-                }
+                },
+                '/tools/run_evasion_protocol.sh': {
+                    type: 'executable',
+                    action: async () => {
+                        if (traceLevel <= 0) {
+                            appendToTerminal("[EvasionProtocol] Aucun protocole d'évasion nécessaire. Niveau de trace bas.", "info");
+                            return;
+                        }
+                        appendToTerminal("Activation du protocole d'évasion...", "warning");
+                        appendToTerminal("Nettoyage des traces et redirection du trafic...", "info");
+                        const initialTrace = traceLevel;
+                        let reductionMade = 0;
+                        const reductionInterval = setInterval(() => {
+                            const reductionAmount = Math.min(5, traceLevel - reductionMade); // Correction ici pour éviter de réduire en dessous de 0
+                            reductionMade += reductionAmount;
+                            traceLevel = Math.max(0, initialTrace - reductionMade);
+                            appendToTerminal(`Niveau de trace réduit à: ${traceLevel}%`, "info");
+                            updateHeaderFooter();
+                            if (traceLevel <= 0) {
+                                clearInterval(reductionInterval);
+                                appendToTerminal("Protocole d'évasion terminé. Niveau de trace minimal.", "success");
+                                successSound();
+                            }
+                        }, 700);
+                    },
+                    description: "Tente de réduire le niveau de trace système."
+                },
+                '/data/': { type: 'directory', children: ['compromised_hashes.log'], owner: 'root', permissions: 'rwxr-x---', protected: 1 }, 
+                '/data/compromised_hashes.log': {
+                    type: 'file',
+                    content: [
+                        "NyxNet Internal Hash Dump - For Educational Purposes Only",
+                        "------------------------------------------------------",
+                        "HASH_TYPE: NYX_SHA2_SIMULATED",
+                        "",
+                        "TARGET: data_archive_alpha_admin_backup",
+                        "HASH: 6a8f5c2b9d0e1f3a7c4b8e0d2f1a3c5b", 
+                        "PLAINTEXT_SOLUTION: ARCHIVEKEY2077", 
+                        "",
+                        "TARGET: corp_firewall_maintenance_access",
+                        "HASH: e3b0c44298fc1c149afbf4c8996fb924", 
+                        "PLAINTEXT_SOLUTION: firewallPass",
+                    ],
+                    owner: 'nyx_user', permissions: 'r--------', protected: 2 
+                },
+                 '/data/oracle_core_schematics.dat': { 
+                    type: 'file', 
+                    content: ["// ACCÈS RESTREINT - DONNÉES NON ENCORE EXTRAITES //"], 
+                    owner: 'nyx_user', permissions: 'r--------', protected: 3
+                },
+                '/sys/modules/StealthModule.sys_CORRUPTED': { type: 'file', content: ["MODULE STEALTH ENDOMMAGÉ", "Réactivation requiert séquence de diagnostic avancée.", "INDICE: Écho Delta"], owner: 'root', permissions: 'r--r--r--', protected: 2},
+
             };
-            function resolvePath(path, baseDir = currentDirectory) { /* ... (comme avant) ... */ return path; } 
-            function getNode(path) { /* ... (comme avant) ... */ return fileSystem[path] || fileSystem[path+'/'] ; } 
+            function resolvePath(path, baseDir = currentDirectory) {
+                let stack;
+                let normalizedBaseDir = baseDir;
+                if (normalizedBaseDir !== '/' && !normalizedBaseDir.endsWith('/')) {
+                    normalizedBaseDir += '/';
+                }
+
+                if (path.startsWith('/')) {
+                    stack = []; 
+                } else {
+                    stack = (normalizedBaseDir === '/') ? [] : normalizedBaseDir.slice(1, -1).split('/');
+                }
+
+                const parts = path.split('/');
+
+                for (const part of parts) {
+                    if (part === '.' || part === '') continue;
+                    if (part === '..') {
+                        if (stack.length > 0) stack.pop();
+                    } else {
+                        stack.push(part);
+                    }
+                }
+
+                if (stack.length === 0) return '/'; 
+
+                let finalPath = '/' + stack.join('/');
+                const potentialDirKey = finalPath + '/';
+                if (path.endsWith('/') || (fileSystem[potentialDirKey] && fileSystem[potentialDirKey].type === 'directory')) {
+                    if (!finalPath.endsWith('/')) {
+                        finalPath += '/';
+                    }
+                }
+                return finalPath;
+            } 
+            function getNode(path) { return fileSystem[path]; }  
 
             function updatePrompt() { if(promptElement) promptElement.innerHTML = `<span class="text-cyan-bright">${currentUser}@nyx-os</span>:<span class="text-purple-bright">${currentDirectory}</span>$&nbsp;`; }
-            function appendToTerminal(text, type = '', html = false) { /* ... (comme avant) ... */ }
-            function attemptLogin(args) { /* ... (comme avant) ... */ }
+            function appendToTerminal(text, type = '', html = false) {
+                if (!terminalOutput) return;
+                const p = document.createElement('div');
+                p.className = type; 
+                if (html) p.innerHTML = text; else p.textContent = text;
+                terminalOutput.appendChild(p);
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
+            function attemptLogin(args) {
+                 if (args[0] === 'nyx_user' && args[1] === 'veil') { 
+                    currentUser = 'nyx_user'; accessLevel = 1; loginSound();
+                    updatePrompt(); appendToTerminal("Accès autorisé: nyx_user", "success");
+                    if(userStatusEl) userStatusEl.textContent = `USER: ${currentUser}`;
+                    failedLoginAttempts = 0; 
+                    addNewNyxMessage({
+                        id: `msg_tool_grant_${Date.now()}`, sender: 'Nyx_Quartermaster', subject: 'Dotation Initiale', timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), 
+                        body: "Opérateur,\n\nLes outils `PortProbe.tool` et `BasicExploit.sh` ont été ajoutés à votre répertoire /tools/.\nConsultez `NyxMapper` pour les cibles potentielles.\nUn nouveau fichier de hashes compromis a été loggué dans `/data/compromised_hashes.log`. L'application `PasswordCracker.app` pourrait être utile.\n\nBonne chasse.", read: false
+                    });
+                    // Assurer que les répertoires et fichiers de base existent
+                    if (!fileSystem['/tools/']) {
+                        fileSystem['/tools/'] = { type: 'directory', children: ['PortProbe.tool', 'BasicExploit.sh', 'DataLeech.payload', 'run_evasion_protocol.sh'], owner: 'nyx_user', permissions: 'rwxr-x---', protected: 1 };
+                        if (fileSystem['/'] && !fileSystem['/'].children.includes('tools/')) fileSystem['/'].children.push('tools/');
+                    } else { 
+                         if (!fileSystem['/tools/'].children.includes('BasicExploit.sh')) fileSystem['/tools/'].children.push('BasicExploit.sh');
+                         if (!fileSystem['/tools/'].children.includes('DataLeech.payload')) fileSystem['/tools/'].children.push('DataLeech.payload');
+                         if (!fileSystem['/tools/'].children.includes('run_evasion_protocol.sh')) fileSystem['/tools/'].children.push('run_evasion_protocol.sh');
+                    }
+                     if (!fileSystem['/data/']) { 
+                        fileSystem['/data/'] = { type: 'directory', children: ['compromised_hashes.log', 'oracle_core_schematics.dat'], owner: 'root', permissions: 'rwxr-x---', protected: 1 };
+                         if (fileSystem['/'] && !fileSystem['/'].children.includes('data/')) fileSystem['/'].children.push('data/');
+                    } else {
+                        if (!fileSystem['/data/'].children.includes('compromised_hashes.log')) fileSystem['/data/'].children.push('compromised_hashes.log');
+                        if (!fileSystem['/data/'].children.includes('oracle_core_schematics.dat')) fileSystem['/data/'].children.push('oracle_core_schematics.dat');
+                    }
+                     if (!fileSystem['/sys/modules/StealthModule.sys_CORRUPTED']) {
+                        fileSystem['/sys/modules/StealthModule.sys_CORRUPTED'] = { type: 'file', content: ["MODULE STEALTH ENDOMMAGÉ", "Réactivation requiert séquence de diagnostic avancée.", "INDICE: Écho Delta"], owner: 'root', permissions: 'r--r--r--', protected: 2};
+                        if(fileSystem['/sys/modules/'] && !fileSystem['/sys/modules/'].children.includes('StealthModule.sys_CORRUPTED')) {
+                            fileSystem['/sys/modules/'].children.push('StealthModule.sys_CORRUPTED');
+                        }
+                     }
+
+
+                } else { errorSound(); appendToTerminal("Échec authentification.", "error"); 
+                    failedLoginAttempts++;
+                    let traceIncrease = 5 * failedLoginAttempts;
+                    if(isStealthModeActive) traceIncrease = Math.floor(traceIncrease / 2);
+                    traceLevel = Math.min(100, traceLevel + traceIncrease); 
+                    updateHeaderFooter();
+                    if (failedLoginAttempts >= 3) {
+                        triggerSystemAlert("Multiples tentatives de connexion échouées. Activité suspecte enregistrée.", "critical", "ALERTE DE SÉCURITÉ");
+                    }
+                }
+            }
             
             // --- Logique des nouvelles applications ---
-            function openEchoPlayer(filePath) { /* ... (comme avant) ... */ }
-            function openCognitoDecryptor(echoData = null, echoName = "Inconnu") { /* ... (comme avant, avec la logique de déverrouillage de nœud et de message) ... */ }
+            function openEchoPlayer(filePath) {
+                let nodeToPlay;
+                if (filePath) {
+                    const resolvedPath = resolvePath(filePath, currentDirectory);
+                    nodeToPlay = getNode(resolvedPath);
+                }
+
+                if (nodeToPlay && nodeToPlay.type === 'echo_file') {
+                    currentEcho = nodeToPlay; 
+                    const echoFileName = filePath.split('/').pop(); 
+                    windowManager.createWindow(`echo-player-${echoFileName}`, `Echo Player - ${echoFileName}`, (contentDiv) => {
+                        const videoId = `echo-video-${Date.now()}`; 
+                        const buttonId = `open-decryptor-btn-${Date.now()}`; 
+                        contentDiv.innerHTML = `
+                            <video id="${videoId}" class="echo-player-video" controls autoplay>
+                                <source src="${nodeToPlay.videoUrl}" type="video/mp4">
+                                Votre navigateur ne supporte pas la balise vidéo ou le format de la vidéo est incorrect.
+                            </video>
+                            <div class="echo-player-controls">
+                                <p class="info text-sm mb-2">Indice/Question: ${nodeToPlay.enigma || "Analysez attentivement cet Écho."}</p>
+                                <button id="${buttonId}" class="echo-player-controls button">Ouvrir Cognito Decryptor</button>
+                            </div>`;
+                        const videoElement = contentDiv.querySelector(`#${videoId}`);
+                        videoElement.onerror = () => {
+                            contentDiv.querySelector('.echo-player-controls').insertAdjacentHTML('afterbegin', '<p class="error">Erreur: Impossible de charger la vidéo. Vérifiez l\'URL.</p>');
+                        };
+                        contentDiv.querySelector(`#${buttonId}`).onclick = () => openCognitoDecryptor(nodeToPlay, echoFileName);
+                    }, { width: '680px', height: 'auto' });
+                } else if (filePath) {
+                    appendToTerminal(`Erreur: '${filePath}' n'est pas un fichier Écho valide. Utilisez 'open /chemin/vers/fichier.echo'`, "error");
+                } else {
+                     appendToTerminal("Usage: open <chemin_vers_fichier.echo>", "info");
+                }
+            }
+            function openCognitoDecryptor(echoData = null, echoName = "Inconnu") {
+                const targetEcho = echoData || currentEcho; 
+
+                windowManager.createWindow('cognito-decryptor', `Cognito Decryptor`, (contentDiv) => {
+                    const inputId = `decryptor-input-${Date.now()}`;
+                    const resultId = `decryptor-result-${Date.now()}`;
+                    const buttonId = `decryptor-submit-btn-${Date.now()}`;
+
+                    contentDiv.innerHTML = `
+                        <p class="info text-sm mb-1">${targetEcho ? `Décryptage pour Écho: ${echoName}` : "Aucun Écho actif."}</p>
+                        <p class="text-xs mb-3">${targetEcho ? (targetEcho.enigma || "Entrez la solution de l'Écho.") : "Veuillez sélectionner un Écho avant d'utiliser le décrypteur."}</p>
+                        <input type="text" id="${inputId}" class="cognito-decryptor-input" placeholder="Solution...">
+                        <button id="${buttonId}" class="cognito-decryptor-button">SOUMETTRE ANALYSE</button>
+                        <div id="${resultId}" class="mt-3 text-sm"></div>
+                    `;
+                    
+                    contentDiv.querySelector(`#${buttonId}`).onclick = () => {
+                        const solutionInput = contentDiv.querySelector(`#${inputId}`).value;
+                        const resultDiv = contentDiv.querySelector(`#${resultId}`);
+                        if (targetEcho) {
+                            if (solutionInput.trim().toUpperCase() === targetEcho.solution.toUpperCase()) {
+                                resultDiv.innerHTML = '<p class="success">SOLUTION CORRECTE. Nouvelles données potentiellement débloquées.</p>';
+                                successSound();
+                                appendToTerminal(`[Cognito] Solution pour ${echoName} acceptée.`, "success");
+                                
+                                if (targetEcho.unlocksNode && networkNodes[targetEcho.unlocksNode]) {
+                                    networkNodes[targetEcho.unlocksNode].locked = false;
+                                    networkNodes[targetEcho.unlocksNode].status = 'Online'; 
+                                    appendToTerminal(`[NyxMapper] Accès au nœud '${networkNodes[targetEcho.unlocksNode].label}' déverrouillé.`, "success");
+                                    const mapperCanvas = document.getElementById('nyx-mapper-canvas');
+                                    if(mapperCanvas) drawNyxMapper(mapperCanvas);
+                                }
+                                if (targetEcho.nextMessageId) {
+                                    const messagesToAdd = {
+                                        "msg_alpha_solved": { id: `msg_alpha_solved_${Date.now()}`, sender: 'Nyx_Admin', subject: 'Progression : Archive Alpha', timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), body: "Bien joué, Opérateur.\nL'analyse de l'Écho Alpha a permis de localiser l'archive de données 'Data Archive α'.\nElle est maintenant accessible sur NyxMapper.\nUtilisez PortProbe.tool pour examiner ses vulnérabilités.", read: false },
+                                        "msg_beta_solved": {id: `msg_beta_solved_${Date.now()}`, sender: "Unknown_Contact", subject: "Le Relais Zeta...", timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), body: "Le Relais Zeta est de nouveau en ligne grâce à vous... mais pour combien de temps ?\nDes signaux étranges en émanent. Soyez prudent.", read: false},
+                                        "msg_gamma_solved": {id: `msg_gamma_solved_${Date.now()}`, sender: "Nyx_OracleAI_Fragment", subject: "Fragment Gamma Analysé", timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), body: "Symbole OMEGA identifié.\nCeci est une pièce maîtresse du puzzle de l'Oracle.\nDe nouvelles directives suivront. Restez vigilant.", read: false},
+                                        "msg_delta_solved": {id: `msg_delta_solved_${Date.now()}`, sender: "Nyx_TechSupport", subject: "Module Stealth Réparé", timestamp: new Date().toLocaleTimeString('fr-FR', {hour12:false}), body: "Excellent travail, Opérateur.\nLa séquence de diagnostic de l'Écho Delta a permis de réactiver le StealthModule.sys.\nUtilisez la commande 'stealth_mode on' pour réduire votre niveau de trace lors d'opérations sensibles.", read: false}
+                                    };
+                                    if(messagesToAdd[targetEcho.nextMessageId]) {
+                                        addNewNyxMessage(messagesToAdd[targetEcho.nextMessageId]);
+                                    }
+                                }
+                                if (targetEcho.unlocksFeature === "stealth_module") {
+                                    const stealthModuleActive = getNode('/sys/modules/StealthModule.sys_ACTIVE');
+                                    if (!stealthModuleActive) { 
+                                        fileSystem['/sys/modules/StealthModule.sys_ACTIVE'] = {type: 'file', content: ["// Module Stealth Actif - Version 1.2 //", "Réduit la signature des opérations."], owner: 'root', permissions: 'r-xr-xr-x', protected: 1};
+                                        if(fileSystem['/sys/modules/'] && !fileSystem['/sys/modules/'].children.includes('StealthModule.sys_ACTIVE')) {
+                                            fileSystem['/sys/modules/'].children.push('StealthModule.sys_ACTIVE');
+                                        }
+                                        const corruptedIndex = fileSystem['/sys/modules/'].children.indexOf('StealthModule.sys_CORRUPTED');
+                                        if (corruptedIndex > -1) fileSystem['/sys/modules/'].children.splice(corruptedIndex, 1);
+                                        delete fileSystem['/sys/modules/StealthModule.sys_CORRUPTED'];
+                                        appendToTerminal("[SYSTEM] Module Stealth réactivé. Commande 'stealth_mode' disponible.", "success");
+                                    }
+                                }
+                            } else {
+                                resultDiv.innerHTML = '<p class="error">SOLUTION INCORRECTE. Tentative enregistrée.</p>';
+                                errorSound();
+                            }
+                        } else {
+                            resultDiv.innerHTML = '<p class="warning">Veuillez sélectionner un Écho avant d\'utiliser le décrypteur.</p>';
+                        }
+                    };
+                }, { width: '420px', height: '280px' });
+            }
             
+            function openPasswordCracker() {
+                windowManager.createWindow('password-cracker', 'Password Cracker v1.0', (contentDiv) => {
+                    const inputId = `cracker-input-${Date.now()}`;
+                    const resultId = `cracker-result-${Date.now()}`;
+                    const buttonId = `cracker-submit-btn-${Date.now()}`;
+                    const progressBarContainerId = `cracker-progress-container-${Date.now()}`;
+                    const progressBarId = `cracker-progress-${Date.now()}`;
+
+                    contentDiv.innerHTML = `
+                        <p class="info text-sm mb-2">Entrez le hash à cracker (depuis /data/compromised_hashes.log) :</p>
+                        <input type="text" id="${inputId}" class="password-cracker-input" placeholder="ex: 6a8f5c2b9d0e1f3a7c4b8e0d2f1a3c5b">
+                        <button id="${buttonId}" class="password-cracker-button">LANCER CRACK</button>
+                        <div id="${progressBarContainerId}" class="cracker-progress-bar-container">
+                            <div id="${progressBarId}" class="cracker-progress-bar"></div>
+                        </div>
+                        <div id="${resultId}" class="cracker-result mt-2"></div>
+                    `;
+
+                    const inputEl = contentDiv.querySelector(`#${inputId}`);
+                    const resultEl = contentDiv.querySelector(`#${resultId}`);
+                    const buttonEl = contentDiv.querySelector(`#${buttonId}`);
+                    const progressContainerEl = contentDiv.querySelector(`#${progressBarContainerId}`);
+                    const progressBarEl = contentDiv.querySelector(`#${progressBarId}`);
+
+                    buttonEl.onclick = () => {
+                        const hashToCrack = inputEl.value.trim();
+                        if (!hashToCrack) {
+                            resultEl.innerHTML = '<p class="warning">Veuillez entrer un hash.</p>';
+                            return;
+                        }
+                        resultEl.innerHTML = '<p class="info"><span class="spinner"></span> Crack en cours...</p>';
+                        progressContainerEl.style.display = 'block';
+                        progressBarEl.style.width = '0%';
+                        
+                        let currentProgress = 0;
+                        const progressInterval = setInterval(() => {
+                            currentProgress += Math.floor(Math.random() * 10) + 5;
+                            if (currentProgress > 100) currentProgress = 100;
+                            progressBarEl.style.width = `${currentProgress}%`;
+                            if (currentProgress >= 100) {
+                                clearInterval(progressInterval);
+                                const hashesNode = getNode('/data/compromised_hashes.log');
+                                let foundPassword = null;
+                                if (hashesNode && hashesNode.type === 'file') {
+                                    const lines = hashesNode.content;
+                                    for (let i = 0; i < lines.length; i++) {
+                                        if (lines[i].startsWith("HASH:") && lines[i].includes(hashToCrack)) {
+                                            if (lines[i+1] && lines[i+1].startsWith("PLAINTEXT_SOLUTION:")) {
+                                                foundPassword = lines[i+1].split(":")[1].trim();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                if (foundPassword) {
+                                    resultEl.innerHTML = `<p class="success">MOT DE PASSE TROUVÉ : <span class="font-bold text-cyan-bright">${foundPassword}</span></p>`;
+                                    successSound();
+                                    appendToTerminal(`[PasswordCracker] Hash ${hashToCrack} résolu : ${foundPassword}`, "success");
+                                } else {
+                                    resultEl.innerHTML = '<p class="error">ÉCHEC DU CRACK. Hash inconnu ou trop complexe.</p>';
+                                    errorSound();
+                                }
+                                progressContainerEl.style.display = 'none';
+                            }
+                        }, 200);
+                    };
+                }, {width: '450px', height: 'auto'});
+            }
+
             // --- NyxComms Logic ---
-            const nyxMessages = [ /* ... (comme avant) ... */ ];
+            const nyxMessages = [
+                { id: 'msg001', sender: 'Nyx_Admin', subject: 'Bienvenue, Opérateur', timestamp: '2077.10.26_02:33', body: "Vos identifiants ont été validés.\nVotre première tâche : localiser et analyser l'Écho Alpha.\nIl se trouve dans /echo_fragments/fragment_alpha.echo\nUtilisez la commande 'open' pour le visionner.\n\nLe Voile observe.", read: false },
+                { id: 'msg002', sender: 'Unknown_Contact', subject: 'AVERTISSEMENT URGENT', timestamp: '2077.10.25_18:05', body: "Ils savent que vous cherchez.\nL'Oracle n'est pas mort, il est fragmenté.\nChaque Écho est une clé, mais aussi un piège.\nMéfiez-vous des ombres que vous ne projetez pas.\n\nIndice pour le pare-feu CorpX : cherchez les ports non standards souvent utilisés pour le débogage HTTP.\nIl est visible sur NyxMapper, mais son accès direct est... compliqué.\n\n- Un Ami (ou pas)", read: false },
+                { id: 'msg003', sender: 'Nyx_TechSupport', subject: 'Rapport Système : Module IA', timestamp: '2077.10.26_09:15', body: "Le module d'analyse NyxCore_AI est actuellement hors-ligne pour maintenance.\nLes analyses d'Échos devront être effectuées manuellement via CognitoDecryptor.\nNous travaillons à sa réintégration.\n\n- Support Technique NyxNet", read: true }
+            ];
             let hasUnreadMessages = nyxMessages.some(msg => !msg.read);
-            function updateCommsIndicator() { /* ... (comme avant) ... */ }
-            function addNewNyxMessage(newMessage) { /* ... (comme avant) ... */ }
-            function renderMessageListInComms(listPanel, viewPanel) { /* ... (comme avant) ... */ }
-            function openNyxComms() { /* ... (comme avant) ... */ }
+
+            function updateCommsIndicator() {
+                if (commsIndicatorEl) {
+                    hasUnreadMessages = nyxMessages.some(msg => !msg.read);
+                    if (hasUnreadMessages) {
+                        commsIndicatorEl.classList.add('new-message');
+                    } else {
+                        commsIndicatorEl.classList.remove('new-message');
+                    }
+                }
+            }
+            
+            function addNewNyxMessage(newMessage) {
+                nyxMessages.unshift(newMessage); 
+                updateCommsIndicator();
+                const commsWindowContent = windowManager.getWindowContent('window-nyx-comms');
+                if (commsWindowContent) {
+                    const listPanel = commsWindowContent.querySelector('#message-list-panel');
+                    const viewPanel = commsWindowContent.querySelector('#message-view-panel');
+                    if (listPanel && viewPanel) { 
+                         renderMessageListInComms(listPanel, viewPanel); 
+                    }
+                }
+                successSound(); 
+            }
+            
+            function renderMessageListInComms(listPanel, viewPanel) { 
+                listPanel.innerHTML = ''; 
+                nyxMessages.sort((a,b) => (a.read === b.read) ? 0 : a.read ? 1 : -1); 
+                nyxMessages.forEach(msg => {
+                    const msgItem = document.createElement('div');
+                    msgItem.className = 'message-item';
+                    msgItem.classList.toggle('unread', !msg.read);
+                    msgItem.classList.toggle('read', msg.read);
+                    
+                    msgItem.innerHTML = `
+                        <span class="message-sender">${msg.sender}</span>
+                        <span class="message-subject">${msg.subject}</span>
+                        <span class="message-timestamp">${msg.timestamp}</span>
+                    `;
+                    
+                    msgItem.onclick = () => {
+                        document.querySelectorAll('#message-list-panel .message-item.selected').forEach(el => el.classList.remove('selected'));
+                        msgItem.classList.add('selected');
+                        msgItem.classList.remove('unread');
+                        msgItem.classList.add('read');
+                        msg.read = true;
+                        updateCommsIndicator();
+
+                        viewPanel.innerHTML = `
+                            <h4>De: ${msg.sender}</h4>
+                            <p style="font-size:0.8em; opacity:0.7; margin-bottom:10px;">Sujet: ${msg.subject}<br>Date: ${msg.timestamp}</p>
+                            <div class="message-body">${msg.body.replace(/\n/g, '<br>')}</div>
+                        `;
+                    };
+                    listPanel.appendChild(msgItem);
+                });
+            }
 
 
-            async function handleCommand(cmd) { /* ... (comme avant, avec la logique de PortProbe et BasicExploit) ... */ }
+            function openNyxComms() {
+                windowManager.createWindow('nyx-comms', 'NyxComms v0.3', (contentDiv) => {
+                    contentDiv.innerHTML = `
+                        <div class="nyx-comms-container">
+                            <div id="message-list-panel" class="message-list-panel"></div>
+                            <div id="message-view-panel" class="message-view-panel">
+                                <p class="info">Sélectionnez un message pour le lire.</p>
+                            </div>
+                        </div>`;
+                    const listPanel = contentDiv.querySelector('#message-list-panel');
+                    const viewPanel = contentDiv.querySelector('#message-view-panel');
+                    renderMessageListInComms(listPanel, viewPanel); 
+                    updateCommsIndicator(); 
+                }, {width: '700px', height: '500px'});
+            }
+
+
+            async function handleCommand(cmd) {
+                const [command, ...args] = cmd.trim().split(' ');
+                if (terminalOutput && promptElement) appendToTerminal(`${promptElement.textContent}${cmd}`);
+                keyClickSound();
+
+                if (command.startsWith('./')) {
+                    const scriptPath = resolvePath(command.substring(2), currentDirectory);
+                    const scriptNode = getNode(scriptPath);
+                    if (scriptNode && scriptNode.type === 'executable') {
+                        if (scriptNode.action) { 
+                           await scriptNode.action(args); 
+                        } else {
+                            appendToTerminal(`Erreur: Action non définie pour le script '${command.substring(2)}'.`, "error");
+                        }
+                    } else {
+                        appendToTerminal(`Script non trouvé ou non exécutable: ${command.substring(2)}`, "error");
+                    }
+                    return;
+                }
+                switch(command.toLowerCase()){
+                    case 'help': appendToTerminal("Commandes: ls, cd, cat, ./login.sh, apps, open <fichier.echo>, clear, help, music on/off, stealth_mode [on|off]", "info"); break;
+                    case 'ls': 
+                        const nodeLs = getNode(currentDirectory);
+                        if (nodeLs && nodeLs.type === 'directory') {
+                            appendToTerminal(`Contenu de ${currentDirectory}:`, 'info');
+                            nodeLs.children.forEach(c => appendToTerminal(c));
+                        } else appendToTerminal("Erreur: Chemin invalide", "error");
+                        break;
+                    case 'cd': 
+                         if (!args[0]) { appendToTerminal("Usage: cd <répertoire>", "info"); break;}
+                         const newPath = resolvePath(args[0], currentDirectory);
+                         const targetNodeCd = getNode(newPath);
+                         if (targetNodeCd && targetNodeCd.type === 'directory') { currentDirectory = newPath; updatePrompt();}
+                         else { appendToTerminal(`Répertoire non trouvé: ${args[0]}`, "error");}
+                        break;
+                    case 'cat': 
+                        if (!args[0]) { appendToTerminal("Usage: cat <fichier>", "info"); break;}
+                        const filePathCat = resolvePath(args[0], currentDirectory);
+                        const fileNodeCat = getNode(filePathCat);
+                        if (fileNodeCat && fileNodeCat.type === 'file') {
+                            if (fileNodeCat.protected > accessLevel) {
+                                appendToTerminal("Accès refusé. Niveau insuffisant.", "error"); errorSound(); break;
+                            }
+                             if (fileNodeCat.encrypted) {
+                                const password = await promptPassword(`Mot de passe pour ${args[0]}:`);
+                                if (password === fileNodeCat.password) {
+                                    successSound();
+                                    appendToTerminal(`Contenu de <span class="filename">${args[0]}</span> (déchiffré):`, 'info', true);
+                                    appendToTerminal(fileNodeCat.content.join('\n'));
+                                } else { errorSound(); appendToTerminal("Mot de passe incorrect.", 'error');}
+                            } else {
+                                appendToTerminal(fileNodeCat.content.join('\n'));
+                            }
+                        } else { appendToTerminal(`Fichier non trouvé: ${args[0]}`, "error");}
+                        break;
+                    case 'apps': 
+                        appendToTerminal("Applications disponibles dans /apps/:", "info");
+                        const appsNode = getNode('/apps/');
+                        if (appsNode && appsNode.children) {
+                            appsNode.children.forEach(app => appendToTerminal(`  ${app} (exécuter avec ./apps/${app})`));
+                        }
+                        break;
+                    case 'open': 
+                        if (args[0]) openEchoPlayer(args[0]);
+                        else appendToTerminal("Usage: open <chemin_vers_fichier.echo>", "info");
+                        break;
+                    case 'clear': if(terminalOutput) terminalOutput.innerHTML = ""; break;
+                    case 'music':
+                        if (args[0] === 'on') startBackgroundMusic();
+                        else if (args[0] === 'off') stopBackgroundMusic();
+                        else appendToTerminal("Usage: music [on|off]", "info");
+                        break;
+                    case 'stealth_mode':
+                        const stealthModuleActive = getNode('/sys/modules/StealthModule.sys_ACTIVE');
+                        if (!stealthModuleActive) {
+                            appendToTerminal("Erreur: Module Stealth non actif ou introuvable. Réparez-le via l'Écho Delta.", "error");
+                            traceLevel = Math.min(100, traceLevel + 2); updateHeaderFooter();
+                            break;
+                        }
+                        if (args[0] === 'on') {
+                            isStealthModeActive = true;
+                            appendToTerminal("Mode Stealth <span class='text-purple-bright'>ACTIVÉ</span>. Augmentation du niveau de trace réduite.", "success", true);
+                        } else if (args[0] === 'off') {
+                            isStealthModeActive = false;
+                            appendToTerminal("Mode Stealth <span class='text-orange-warning'>DÉSACTIVÉ</span>.", "info", true);
+                        } else {
+                            appendToTerminal("Usage: stealth_mode [on|off]", "info");
+                        }
+                        updateHeaderFooter(); // Mettre à jour l'affichage du footer
+                        break;
+                    default: appendToTerminal(`Commande inconnue: '${command}'.`, "error"); errorSound();
+                }
+            }
 
             // --- Séquence de Boot ---
-            const bootMessages = [ /* ... */ ];
-            async function runBootSequence(messages) { /* ... (comme avant) ... */ }
+            const bootMessages = [
+                { text: "INIT NYX_KERNEL_V3.0...", delay: 200, progress: 10 },
+                { text: "MEMORY CHECK...........OK", delay: 300, progress: 25 },
+                { text: "LOADING CORE MODULES...", delay: 500, progress: 50 },
+                { text: "ORACLE ECHO HANDLER....ONLINE", delay: 400, progress: 65, type: 'success'},
+                { text: "ENCRYPTION LAYER.......ACTIVE", delay: 300, progress: 75 },
+                { text: "NYXOS 'ORACLE ECHOES' ONLINE", delay: 200, progress: 100, type: 'success' }
+            ];
+            async function runBootSequence(messages) {
+                for (let i = 0; i < messages.length; i++) {
+                    const msg = messages[i];
+                    if (bootTextEl) {
+                        const p = document.createElement('p');
+                        if (msg.type) p.className = msg.type;
+                        p.textContent = msg.text;
+                        bootTextEl.appendChild(p);
+                    }
+                    if (bootProgressBarEl) bootProgressBarEl.style.width = `${msg.progress}%`;
+                    await new Promise(resolve => setTimeout(resolve, msg.delay));
+                }
+                setTimeout(() => {
+                    if (bootScreenEl) bootScreenEl.style.display = 'none';
+                    if (desktopEl) desktopEl.style.display = 'flex'; 
+                    windowManager.createWindow('nyx-terminal', 'NyxTerm v3.0', (contentDiv) => {
+                        contentDiv.innerHTML = `<div id="terminal-output"></div><div class="prompt-line"><span id="prompt"></span><input type="text" id="terminal-input" class="terminal-input" spellcheck="false" autofocus/></div>`;
+                        terminalOutput = contentDiv.querySelector('#terminal-output');
+                        terminalInput = contentDiv.querySelector('#terminal-input');
+                        promptElement = contentDiv.querySelector('#prompt');
+                        appendToTerminal("Bienvenue sur NyxOS v3.0. Tapez 'help' pour les commandes.", "info");
+                        updatePrompt();
+                        terminalInput.addEventListener('keydown', (e) => {
+                            if (e.key === 'Enter') {
+                                e.preventDefault();
+                                const command = terminalInput.value;
+                                if (command.trim() !== "") commandHistory.unshift(command);
+                                historyIndex = -1;
+                                handleCommand(command);
+                                terminalInput.value = '';
+                            } 
+                        });
+                    }, { width: '70%', height: '70%' });
+                    updateCommsIndicator(); 
+                }, 300);
+            }
             runBootSequence(bootMessages);
 
             // --- Horloge et Status ---
-            function updateHeaderFooter() { /* ... (comme avant) ... */ }
+            function updateHeaderFooter() {
+                if (nyxClockEl) nyxClockEl.textContent = new Date().toLocaleTimeString('fr-FR');
+                if (userStatusEl && currentUser) userStatusEl.textContent = `USER: ${currentUser} (LVL: ${accessLevel})`;
+                if (traceLevelStatusEl) {
+                    traceLevelStatusEl.textContent = `TRACE: ${traceLevel}%`;
+                    if (isStealthModeActive) {
+                        traceLevelStatusEl.classList.add('stealth');
+                        traceLevelStatusEl.title = "Mode Stealth Actif";
+                    } else {
+                        traceLevelStatusEl.classList.remove('stealth');
+                        traceLevelStatusEl.title = "";
+                    }
+                }
+                 // Vérification du seuil de trace pour alerte
+                if (traceLevel >= 75 && traceLevel < 100 && systemAlertOverlayEl.style.display === 'none') {
+                    triggerSystemAlert("NIVEAU DE TRACE ÉLEVÉ - PRUDENCE REQUISE !", "warning", "ALERTE SÉCURITÉ");
+                } else if (traceLevel >= 100 && systemAlertOverlayEl.style.display === 'none') {
+                     triggerSystemAlert("NIVEAU DE TRACE CRITIQUE - VERROUILLAGE SYSTÈME IMMINENT ! UTILISEZ ./tools/run_evasion_protocol.sh", "critical", "ALERTE MAXIMALE");
+                }
+            }
             setInterval(updateHeaderFooter, 1000);
             updateHeaderFooter(); 
             
